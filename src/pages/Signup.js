@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignup } from '../context/SignupContext';
@@ -133,3 +134,4 @@ const Signup = () => {
 };
 
 export default Signup;
+

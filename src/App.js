@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
 import { SignupProvider } from './context/SignupContext';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -15,6 +16,7 @@ class App extends Component {
     return (
       <div className='App'>
         <Router>
+
           <SignupProvider>
           <Routes>
             <Route path="/signup" element={<Signup />} />
@@ -23,6 +25,7 @@ class App extends Component {
 
           </Routes>
           </SignupProvider>
+
         </Router>
       </div>
     );
