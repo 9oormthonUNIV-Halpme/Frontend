@@ -5,7 +5,9 @@ import { SignupProvider } from './context/SignupContext';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import AddressSearch from './pages/AddressSearch';
-
+import AddressDetail from './pages/AddressDetail';
+import Home from './pages/Home';
+import Writing from './pages/Writing';
 
 // import logo from './logo.svg';
 import './App.css';
@@ -16,16 +18,16 @@ class App extends Component {
     return (
       <div className='App'>
         <Router>
-
           <SignupProvider>
-          <Routes>
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/" element={<Login />} />
-            <Route path="/search-address" element={<AddressSearch />} />
-
-          </Routes>
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/address-search" element={<AddressSearch />} />
+              <Route path="/address-detail" element={<AddressDetail />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/writing" element={<Writing />} />
+            </Routes>
           </SignupProvider>
-
         </Router>
       </div>
     );
