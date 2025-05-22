@@ -95,7 +95,7 @@ const Signup = () => {
           onChange={handleChange}
           placeholder="주소를 입력하세요"
         />
-        <SearchIcon onClick={() => navigate('/search-address')}>🔍</SearchIcon>
+        <SearchIcon onClick={() => navigate('/address-search')}>🔍</SearchIcon>
       </AddressRow>
 
       <Label>이메일</Label>
