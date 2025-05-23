@@ -20,7 +20,9 @@ jobs:
               with:
                 name: frontend-build
                 path: build
+                repository: 9oormthonUNIV-Halpme/Frontend
                 run-id: ${{ github.event.workflow_run.id }}
+                github-token: ${{ secrets.TOKEN_GITHUB }}
             
             - name: Prepare Nginx directory and permissions
               run: |
