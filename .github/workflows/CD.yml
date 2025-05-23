@@ -20,6 +20,7 @@ jobs:
               with:
                 name: frontend-build
                 path: build
+                run-id: ${{ github.event.workflow_run.id }}
             
             - name: Prepare Nginx directory and permissions
               run: |
