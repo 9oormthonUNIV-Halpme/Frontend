@@ -11,7 +11,7 @@ permissions:
 jobs:
   # React 빌드 후 Nginx에 배포
   build-and-deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       # 1. GitHub 리포지토리 체크아웃
       - name: Checkout code
