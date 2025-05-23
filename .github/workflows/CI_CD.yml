@@ -45,8 +45,10 @@ jobs:
       # 6. 빌드 파일 Nginx에 배포
       - name: Deploy build to Nginx directory
         run: |
+          sudo mkdir -p -m 2775 /var/www/halpme-frontend-temp
+          sudo chown -R ubuntu:www-data /var/www/halpme-frontend-temp
           sudo rm -rf /var/www/halpme-frontend-temp/* /var/www/halpme-frontend-temp/.[!.]*
-          sudo cp -r build/* /var/www/halpme-frontend-temp/
+          sudo cp -r build/* /var/www/halpme-frontend-temp
           sudo rm -rf /var/www/halpme-frontend/* /var/www/halpme-frontend/.[!.]*
           sudo mv /var/www/halpme-frontend-temp/* /var/www/halpme-frontend/
           sudo mv /var/www/halpme-frontend-temp/.[!.]* /var/www/halpme-frontend/ 2>/dev/null || true
