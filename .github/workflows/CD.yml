@@ -1,0 +1,43 @@
+name: Halpme Frontend CD
+
+on:
+  workflow_run:
+    workflows: [ "Halpme Frontend CI" ]
+    types:
+      - completed
+    branches: [ "main" ]
+
+permissions:
+    contents: read
+
+jobs:
+    deploy-to-ec2:
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        runs-on: self-hosted
+        steps:
+            - name: Download artifact
+              uses: actions/download-artifact@v4
+              with:
+                name: frontend-build
+                path: build
+            
+            - name: Prepare Nginx directory and permissions
+              run: |
+                sudo mkdir -p -m 2775 /var/www/halpme-frontend-temp
+                sudo chown -R ubuntu:www-data /var/www/halpme-frontend-temp
+                sudo rm -rf /var/www/halpme-frontend-temp/* /var/www/halpme-frontend-temp/.[!.]*
+
+            - name: Copy build files to temp directory
+              run: |
+                sudo cp -r build/* /var/www/halpme-frontend-temp/
+                sudo cp -r build/.[!.]* /var/www/halpme-frontend-temp/ 2>/dev/null || true
+                sudo chown -R ubuntu:www-data /var/www/halpme-frontend-temp
+
+            - name: Depoly to Nginx
+              run: |
+                sudo rm -rf /var/www/halpme-frontend/* /var/www/halpme-frontend/.[!.]*
+                sudo mv /var/www/halpme-frontend-temp/* /var/www/halpme-frontend/
+                sudo mv /var/www/halpme-frontend-temp/.[!.]* /var/www/halpme-frontend/ 2>/dev/null || true
+
+            - name: Reload Nginx
+              run: sudo systemctl reload nginx
