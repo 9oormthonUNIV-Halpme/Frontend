@@ -4,8 +4,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { SignupProvider } from './context/SignupContext';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
-import AddressSearch from './pages/AddressSearch';
-import AddressDetail from './pages/AddressDetail';
 import Home from './pages/Home';
 import Writing from './pages/Writing';
 
@@ -22,8 +20,6 @@ class App extends Component {
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/address-search" element={<AddressSearch />} />
-              <Route path="/address-detail" element={<AddressDetail />} />
               <Route path="/home" element={<Home />} />
               <Route path="/writing" element={<Writing />} />
             </Routes>
