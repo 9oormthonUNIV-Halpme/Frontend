@@ -39,6 +39,8 @@ jobs:
       # 5. React 빌드
       - name: Build
         run: npm run build
+        env:
+          CI: false
 
       # 6. 빌드 파일 Nginx에 배포
       - name: Deploy build to Nginx directory
