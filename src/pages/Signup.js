@@ -1,10 +1,13 @@
+import axios from 'axios'; // 파일 상단에 추가
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import logo from '../logo.svg';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSignup } from '../context/SignupContext';
 
 const Signup = () => {
+  const location = useLocation(); 
+  const isEdit = location.pathname.includes('edit');
   const navigate = useNavigate();
   const { form, setForm } = useSignup();
 
@@ -12,28 +15,22 @@ const Signup = () => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
-  const handlePostcode = () => {
-  new window.daum.Postcode({
-    oncomplete: function (data) {
-      let addr = '';
 
-      if (data.userSelectedType === 'R') {
-        addr = data.roadAddress;
-      } else {
-        addr = data.jibunAddress;
-      }
-
-      setForm(prev => ({
-        ...prev,
-        zipcode: data.zonecode,
-        address: addr
-      }));
-    },
-  }).open();
-};
+   const handlePostcode = () => {
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        let addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+        setForm(prev => ({
+          ...prev,
+          zipcode: data.zonecode,
+          address: addr,
+        }));
+      },
+    }).open();
+  };
 
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
   const { name, phone, age, gender, address, email, password, confirmPassword } = form;
 
   if (!name.trim()) return alert('이름을 입력해주세요.');
@@ -41,14 +38,42 @@ const Signup = () => {
   if (!age.trim()) return alert('나이를 입력해주세요.');
   if (!gender.trim()) return alert('성별을 선택해주세요.');
   if (!address.trim()) return alert('주소를 입력해주세요.');
-  if (!email.trim()) return alert('이메일을 입력해주세요.');
-  if (!password.trim()) return alert('비밀번호를 입력해주세요.');
-  if (!confirmPassword.trim()) return alert('비밀번호 확인을 입력해주세요.');
-  if (password !== confirmPassword) return alert('비밀번호가 일치하지 않습니다.');
 
-  // 모든 입력값이 유효할 경우 로그인 페이지로 이동
-  alert('회원가입이 완료되었습니다!');
-  navigate('/');
+  if (!isEdit) {
+      if (!email.trim()) return alert('이메일을 입력해주세요.');
+      if (!password.trim()) return alert('비밀번호를 입력해주세요.');
+      if (!confirmPassword.trim()) return alert('비밀번호 확인을 입력해주세요.');
+      if (password !== confirmPassword) return alert('비밀번호가 일치하지 않습니다.');
+
+    try {
+      await axios.post('https://halpme.site/api/v1/auth/signup', {
+        nickname: form.name,
+        password: form.password,
+        email: form.email,
+        phoneNumber: form.phone,
+        age: parseInt(form.age, 10),
+        gender: form.gender === '남' ? 'MALE' : 'FEMALE',
+        address: {
+          zipCode: form.zipcode,
+          basicAddress: form.address,
+          detailAddress: form.addressDetail,
+          direction: form.direction
+        },
+        role: 'ROLE_MEMBER'
+      });
+
+      alert('회원가입이 완료되었습니다!');
+      navigate('/');
+    } catch (error) {
+      console.error('회원가입 실패:', error.response?.data || error);
+      alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+    }
+
+
+  } else {
+    // 추후 회원정보 수정 API 연결 필요
+    alert('회원정보가 수정되었습니다!');
+  }
 };
 
   useEffect(() => {
@@ -71,9 +96,20 @@ const Signup = () => {
     <AppWrapper>
       <Content>
         <FormWrapper>
-                 <Title>회원가입</Title>
+           {isEdit && (
+    <HeaderRow>
+      <BackIcon onClick={() => navigate(-1)}>
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7.89258 13.3027L1.89258 7.30273L7.89258 1.30273" stroke="#1E1E1E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </BackIcon>
+      <Title>회원정보 수정</Title>
+    </HeaderRow>
+  )}
 
-          <FormGroup>
+  {!isEdit && <Title>회원가입</Title>}
+
+            <FormGroup>
             <Label>이름</Label>
             <Input name="name" value={form.name} onChange={handleChange} placeholder="이름을 입력하세요" />
           </FormGroup>
@@ -101,60 +137,52 @@ const Signup = () => {
           <FormGroup>
             <Label>우편번호</Label>
             <AddressRow>
-              <Input
-                name="zipcode"
-                value={form.zipcode || ''}
-                readOnly
-                placeholder="우편번호"
-              />
+              <Input name="zipcode" value={form.zipcode || ''} readOnly placeholder="우편번호" />
               <DongButton type="button" onClick={handlePostcode}>우편번호 찾기</DongButton>
             </AddressRow>
           </FormGroup>
 
           <FormGroup>
             <Label>주소</Label>
-            <Input
-              name="address"
-              value={form.address || ''}
-              readOnly
-              placeholder="기본 주소"
-            />
+            <Input name="address" value={form.address || ''} readOnly placeholder="기본 주소" />
           </FormGroup>
 
           <FormGroup>
             <Label>상세주소</Label>
-            <Input
-              name="addressDetail"
-              value={form.addressDetail || ''}
-              onChange={handleChange}
-              placeholder="예) ㅇㅇ빌라 ㅇㅇ동 ㅇㅇ 호"
-            />
+            <Input name="addressDetail" value={form.addressDetail || ''} onChange={handleChange} placeholder="예) ㅇㅇ빌라 ㅇㅇ동 ㅇㅇ 호" />
           </FormGroup>
 
           <FormGroup>
             <Label>찾아오시는 길</Label>
             <Input name="direction" value={form.direction} onChange={handleChange} placeholder="예) 편의점 뒷편에 있습니다." />
           </FormGroup>
-          <FormGroup>
-            <Label>이메일</Label>
-            <Input name="email" value={form.email} onChange={handleChange} placeholder="이메일을 입력하세요" />
-          </FormGroup>
 
-          <FormGroup>
-            <Label>비밀번호</Label>
-            <Input type="password" name="password" value={form.password} onChange={handleChange} placeholder="........" />
-          </FormGroup>
+          {!isEdit && (
+            <>
+              <FormGroup>
+                <Label>이메일</Label>
+                <Input name="email" value={form.email} onChange={handleChange} placeholder="이메일을 입력하세요" />
+              </FormGroup>
 
-          <FormGroup>
-            <Label>비밀번호 확인</Label>
-            <Input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="........" />
-          </FormGroup>
+              <FormGroup>
+                <Label>비밀번호</Label>
+                <Input type="password" name="password" value={form.password} onChange={handleChange} placeholder="........" />
+              </FormGroup>
 
-          <ConfirmButton onClick={handleConfirm}>확인</ConfirmButton>
+              <FormGroup>
+                <Label>비밀번호 확인</Label>
+                <Input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="........" />
+              </FormGroup>
+            </>
+          )}
 
-          <Footer>
-            계정이 있으신가요? <BoldLink to="/">로그인</BoldLink>
-          </Footer>
+          <ConfirmButton onClick={handleConfirm}>{isEdit ? '수정완료' : '확인'}</ConfirmButton>
+
+          {!isEdit && (
+            <Footer>
+              계정이 있으신가요? <BoldLink to="/">로그인</BoldLink>
+            </Footer>
+          )}
         </FormWrapper>
       </Content>
     </AppWrapper>
@@ -165,12 +193,12 @@ export default Signup;
 
 const AppWrapper = styled.div`
   width: 100%;
-  height: 100%;
-  min-height: 800px;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
   background-color: #f5f5f5;
+  padding: 32px 16px;
+  box-sizing: border-box;
 `;
 
 const Content = styled.div`
@@ -182,8 +210,7 @@ const Content = styled.div`
   background-color: #FFFFFF;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  text-align: center;
-  align-items: center;
+  margin: 0 auto;
 `;
 
 const Title = styled.h2`
@@ -276,13 +303,6 @@ const AddressRow = styled.div`
   gap: 8px;
 `;
 
-const SearchIcon = styled.button`
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-`;
-
 const ConfirmButton = styled.button`
   width: 100%;
   height: 50px;
@@ -312,3 +332,19 @@ const BoldLink = styled(Link)`
   margin-left: 4px;
   text-decoration: none;
 `;
+
+const HeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const BackIcon = styled.div`
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+`;
+
