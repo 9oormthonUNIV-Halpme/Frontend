@@ -15,7 +15,7 @@ export default MobileLayout;
 // 스타일 컴포넌트
 const AppWrapper = styled.div`
   width: 100%;
-  height: 100%;
+  height: 100vh;
   min-height: 800px;
   display: flex;
   justify-content: center;
@@ -26,6 +26,7 @@ const AppWrapper = styled.div`
 const Content = styled.div`
   display: flex;
   flex-direction: column;
+  // justify-content: space-between;  // 공간을 위와 아래로 분산
   gap: 24px;
   width: 100%;
   height: 800px;

@@ -29,7 +29,7 @@ const Login = () => {
         });
 
         //console.log("API 응답:", response);          // 전체 응답 객체 확인
-        console.log("응답 데이터:", response.data);   // 응답 본문만 확인
+        // console.log("응답 데이터:", response.data);   // 응답 본문만 확인
 
         if (response.data.success) {
           const token = response.data.data.token;
@@ -69,8 +69,6 @@ const Login = () => {
                     <img 
                         src={logo}
                         alt="Halpme 로고"
-                        /* style={{ width: '200px', height: '200px'  }} */
-                        
                     />
                 </LogoWrapper>
                 

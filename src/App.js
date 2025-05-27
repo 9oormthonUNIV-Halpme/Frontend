@@ -9,7 +9,7 @@ import Writing from './pages/Writing';
 import ChatList from './pages/ChatList';
 import Chat from './pages/Chat';
 import MyPage from './pages/MyPage';
-
+import PostDetail from './pages/PostDetail';
 
 
 // import logo from './logo.svg';
@@ -31,6 +31,7 @@ class App extends Component {
                 <Route path="/chat-list" element={<ChatList />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/my-page" element={<MyPage />} />
+                <Route path="/post-detail" element={<PostDetail />} />
               </Routes>
             </SignupProvider>
           </AuthProvider>
