@@ -1,32 +1,57 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
-import logo from '../logo.svg'; // 실제 로고 이미지 경로로 수정
+import axios from "axios";
+import logo from "../assets/HalpmeLogo.svg";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import facomment from "../logo.svg"; // 말풍선 아이콘 (Font Awesome)
+import facomment from "../assets/Kakao_Logo.png";
+import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
+    const { login } = useContext(AuthContext);
     const navigate = useNavigate();
-    
-    // 로그인에 사용할 임시 사용자 정보
-    const mockUser = {
-      email: "test",
-      pw: "1234",
-    }; 
 
-    // 일반 로그인
     const [email, setEmail] = useState('');
     const [pw, setPw] = useState('');
 
-    const handleLogin = () => {
-      if(email === mockUser.email && pw === mockUser.pw){
-        alert("로그인 성공");
-        navigate("/home");
+    // 로그인 실행
+    const handleLogin = async () => {
+      if (!email.trim() || !pw.trim()) {
+        alert("이메일과 비밀번호를 모두 입력해주세요.");
+        return;
       }
-      else{
-        alert("이메일 또는 비밀번호가 올바르지 않습니다.")
+
+
+      try {
+        const response = await axios.post("https://halpme.site/api/v1/auth/login", {
+          email: email,
+          pw: pw
+        });
+
+        //console.log("API 응답:", response);          // 전체 응답 객체 확인
+        console.log("응답 데이터:", response.data);   // 응답 본문만 확인
+
+        if (response.data.success) {
+          const token = response.data.data.token;
+          login(token);
+          alert("로그인 성공");
+          navigate("/home");
+        } 
+        else {
+          alert("로그인 실패: " + response.data.message);
+        }
+      } 
+      catch (error) {
+        console.error("로그인 오류:", error);
+        alert("로그인 중 오류가 발생했습니다.");
       }
-    }
+    };
+
+    // Enter 키 입력 처리(일반 로그인)
+    const handleKeyDown = (e) => {
+      if(e.key === 'Enter' )
+        handleLogin();
+    };
 
     // 카카오 소셜 계정 로그인
     const REST_API_KEY = "백엔드";
@@ -49,7 +74,7 @@ const Login = () => {
                     />
                 </LogoWrapper>
                 
-                <FormWrapper>
+                <FormWrapper onKeyDown={handleKeyDown}>
                     <FormGroup>
                         <Label>이메일</Label>
                         <Input 
@@ -90,7 +115,7 @@ const Login = () => {
 
 export default Login;
 
-// 공통 레이아웃웃
+// 공통 레이아웃
 const AppWrapper = styled.div`
   width: 100%;
   height: 100%;
