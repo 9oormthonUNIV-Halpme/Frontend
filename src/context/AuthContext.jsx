@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // 앱 시작 시 로컬스토리지에서 토큰 읽어 로그인 상태 초기화
   useEffect(() => {
@@ -14,7 +15,10 @@ export const AuthProvider = ({ children }) => {
     if (savedToken) {
       setToken(savedToken);
       setIsLoggedIn(true);
-      fetchUserInfo(savedToken);
+      fetchUserInfo(savedToken).finally(() => setIsLoading(false));
+    }
+    else {
+      setIsLoading(false);
     }
   }, []);
 
@@ -72,6 +76,7 @@ export const AuthProvider = ({ children }) => {
     user,
     login,
     logout,
+    isLoading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

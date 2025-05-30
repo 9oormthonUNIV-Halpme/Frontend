@@ -1,13 +1,27 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
 import { AuthContext } from "../context/AuthContext";
+import { WebSocketContext } from "../context/WebSocketContext";
+import axios from "axios";
+import styled from "styled-components";
+
 import ChatLayout from "../components/ChatLayout";
 import ChatMessageList from "../components/ChatMessageList";
+import ChatInput from "../components/ChatInput";
 
 import backIcon from "./../assets/BackIcon.png";
-import cameraIcon from "./../assets/CameraIcon.png";
-import sendIcon from "./../assets/SendIcon.png";
+//import WebSocketDebugger from "../components/WebSocketDebugger"; // 디버깅용
+
+const mockApiResponse = {
+  status: 0,
+  success: true,
+  message: "string",
+  data: {
+    roomMakerEmail: "maker@example.com",
+    guestEmail: "guest@example.com",
+    chatRoomId: "room-1234"
+  }
+};
 
 const mockOpponent = {
   status: 0,
@@ -185,7 +199,16 @@ const Chat = () => {
   const [chatMessages, setChatMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showCameraMenu, setShowCameraMenu] = useState(false);
+  
+  const cameraButtonRef = useRef(null);
+  const menuRef = useRef(null);
+  const inputCameraRef = useRef(null);
+  const inputGalleryRef = useRef(null);
 
+  const { chatRoomId: mockRoomId } = mockApiResponse.data;
+  const { sendMessage, subscribe, markAsRead } = useContext(WebSocketContext);
+  
   const handleBack = () => {
     navigate(-1);
   };
@@ -202,7 +225,98 @@ const Chat = () => {
     setText(e.target.value);
   };
 
-  
+  const toggleCameraMenu = () => {
+    setShowCameraMenu((prev) => !prev);
+  };
+
+  const closeCameraMenu = () => {
+    setShowCameraMenu(false);
+  };
+
+  const uploadImgFilesToS3 = async (files) => {
+    if(files.length === 0) return;
+    const token = localStorage.getItem("token");
+    
+    // 파일 개수 제한
+    const formData = new FormData();
+    files.slice(0, 2).forEach((file) => {
+      formData.append("images", file);
+    });
+
+    try {
+      const response = await axios.post(
+        "https://halpme.site/api/v1/s3/upload",
+        formData, 
+        {
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "multipart/form-data"
+          },
+        }
+      );
+      console.log("S3 업로드 성공: ", response.data);
+      return response.data;
+    }
+    catch (error) {
+      console.error("S3 업로드 실패: ", error);
+      throw error;
+    }
+  };
+
+  const onFileSelected = async (event) => {
+    const files = Array.from(event.target.files); // 이미지 파일 배열
+    //console.log("선택된 파일들:", files);
+    if(files.length === 0) return;
+
+    try {
+      const result = await uploadImgFilesToS3(files);
+      const imageUrls = result.data?.slice(0, 2);
+      //console.log("반환된 파일 정보: ", imageUrls);
+
+      if(imageUrls && imageUrls.length > 0){
+        sendMessage({
+          roomId: mockRoomId,
+          message: "",
+          messageType: "IMAGE",
+          imageUrls,
+        });
+      }
+      else {
+        console.warn("업로드 성공했으나, imageUrls가 비어 있음");
+      }
+      
+    } 
+    catch (e) {
+      alert("파일 업로드 실패!");
+    }
+    finally {
+      closeCameraMenu();
+    }
+  };
+
+  const handlePhotoShoot = () => {
+    console.log("사진 촬영하기 클릭");
+    inputCameraRef.current.click();
+  };
+
+  const handleImgPick = () => {
+    console.log("이미지 선택하기 클릭");
+    inputGalleryRef.current.click();
+  };
+
+  const handleSend = () => {
+    if (!text.trim()) return;
+    sendMessage({ roomId: mockRoomId, message: text.trim(), messageType: "TEXT" });
+    setText("");
+    textareaRef.current.style.height = "48px";
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
   useEffect(() => {
     adjustHeight();
@@ -223,8 +337,48 @@ const Chat = () => {
     fetchMessage();
   }, []);
 
+  // 카메라 메뉴 외 클릭시 메뉴 클로징
+  useEffect(() => {
+    const handleClickOutside = (event) =>{
+      if(
+        cameraButtonRef.current &&
+        !cameraButtonRef.current.contains(event.target) &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ){
+        console.log("클로징카메라메뉴");
+        closeCameraMenu();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, []);
+
+  useEffect(() => {
+    // 구독 콜백
+    const unsub = subscribe(
+      mockRoomId,
+      (incoming) => {
+        setChatMessages((prev) => [...prev, incoming]);
+        // 메시지가 렌더링되면 읽음 처리
+        markAsRead(incoming.id);
+      },
+      // 읽음 상태 업데이트 필요 시
+      (readInfo) => {
+        setChatMessages((prev) =>
+          prev.map((c) => (c.id === readInfo.lastReadId ? { ...c, read: true } : c))
+        );
+      }
+    );
+
+    return () => unsub?.();
+  }, [subscribe, mockRoomId, markAsRead]);
+
   return (
     <ChatLayout>
+       {/*디버깅용 <WebSocketDebugger /> */}
       <ChatHeader>
         <BackButton onClick={handleBack}>
           <img src={backIcon} alt="back"/>
@@ -249,23 +403,22 @@ const Chat = () => {
         }
       </ChatBody>
 
-      <ChatInput>
-        <CameraButton>
-          <img src={cameraIcon} alt="camera"/>
-        </CameraButton>
-
-        <InputForm 
-          ref={textareaRef}
-          value={text}
-          placeholder="메시지를 입력하세요." 
-          onChange={handleChange}
-          rows={1}
-        />
-
-        <SendButton>
-          <img src={sendIcon} alt="send"/>
-        </SendButton>
-      </ChatInput>
+      <ChatInput
+        text={text}
+        textareaRef={textareaRef}
+        showCameraMenu={showCameraMenu}
+        cameraButtonRef={cameraButtonRef}
+        menuRef={menuRef}
+        inputCameraRef={inputCameraRef}
+        inputGalleryRef={inputGalleryRef}
+        handleChange={handleChange}
+        toggleCameraMenu={toggleCameraMenu}
+        onFileSelected={onFileSelected}
+        handlePhotoShoot={handlePhotoShoot}
+        handleImgPick={handleImgPick}
+        onSend={handleSend}
+        onKeyDown={handleKeyDown}
+      />
     </ChatLayout>
   );
 };
@@ -337,15 +490,12 @@ const ChatBody = styled.div`
   -ms-overflow-style: none;
 `;
 
-const ChatInput = styled.div`
-  border: none;
-  width: 100%;
-  min-height: 64px;
-  box-sizing: border-box;
-  padding: 8px 0px;
+
+
+const CameraButtonWrapper = styled.div`
+  position: relative;
   display: flex;
-  align-items: flex-end;
-  justify-content: cener;
+  align-items: center;
 `;
 
 const CameraButton = styled.button`
