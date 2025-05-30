@@ -10,6 +10,7 @@ import Writing from './pages/Writing';
 import ChatList from './pages/ChatList';
 import Chat from './pages/Chat';
 import MyPage from './pages/MyPage';
+import PostList from './pages/PostList';
 import PostDetail from './pages/PostDetail';
 
 import './App.css';
@@ -25,11 +26,14 @@ class App extends Component {
                 <Routes>
                   <Route path="/" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
+                  <Route path="/edit-profile" element={<Signup />} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/writing" element={<Writing />} />
                   <Route path="/chat-list" element={<ChatList />} />
                   <Route path="/chat" element={<Chat />} />
                   <Route path="/my-page" element={<MyPage />} />
+                  <Route path="/post-list" element={<PostList />} />
+                  <Route path="/post/:postId" element={<PostDetail />} />
                   <Route path="/post-detail" element={<PostDetail />} />
                 </Routes>
               </SignupProvider>
