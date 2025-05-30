@@ -42,8 +42,15 @@ const Login = () => {
         }
       } 
       catch (error) {
-        console.error("로그인 오류:", error);
-        alert("로그인 중 오류가 발생했습니다.");
+        if(error.response){
+          console.error("응답 상태: ", error.response.status);
+          console.error("에러 메시지: ", error.response.data.message);
+          alert("로그인 실패: " + error.response.data.message);
+        }
+        else{
+          console.error("알 수 없는 오류: ", error);
+          alert("로그인 중 알 수 없는 오류 발생");
+        }        
       }
     };
 
