@@ -1,15 +1,18 @@
 import axios from 'axios'; // 파일 상단에 추가
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import logo from '../logo.svg';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSignup } from '../context/SignupContext';
+import { AuthContext } from '../context/AuthContext'; 
 
 const Signup = () => {
   const location = useLocation(); 
   const isEdit = location.pathname.includes('edit');
   const navigate = useNavigate();
   const { form, setForm } = useSignup();
+  const { token } = useContext(AuthContext); 
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,10 +39,10 @@ const Signup = () => {
   if (!name.trim()) return alert('이름을 입력해주세요.');
   if (!phone.trim()) return alert('전화번호를 입력해주세요.');
   if (!age.trim()) return alert('나이를 입력해주세요.');
-  if (!gender.trim()) return alert('성별을 선택해주세요.');
   if (!address.trim()) return alert('주소를 입력해주세요.');
 
   if (!isEdit) {
+      if (!gender.trim()) return alert('성별을 선택해주세요.');
       if (!email.trim()) return alert('이메일을 입력해주세요.');
       if (!password.trim()) return alert('비밀번호를 입력해주세요.');
       if (!confirmPassword.trim()) return alert('비밀번호 확인을 입력해주세요.');
@@ -71,8 +74,34 @@ const Signup = () => {
 
 
   } else {
-    // 추후 회원정보 수정 API 연결 필요
+    // 회원정보 수정
+    try {
+    await axios.put(
+    'https://halpme.site/api/v1/members/my-page',
+    {
+      nickname: form.name,
+      phoneNumber: form.phone,
+      age: parseInt(form.age, 10),
+      address: {
+        zipCode: form.zipcode,
+        basicAddress: form.address,
+        detailAddress: form.addressDetail,
+        direction: form.direction
+      }
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
     alert('회원정보가 수정되었습니다!');
+    navigate('/edit-profile');
+  } catch (error) {
+    console.error('회원정보 수정 실패:', error.response?.data || error);
+    alert('회원정보 수정에 실패했습니다. 다시 시도해주세요.');
+  }
   }
 };
 
@@ -90,6 +119,47 @@ const Signup = () => {
   script.async = true;
   document.body.appendChild(script);
 }, []);
+
+useEffect(() => {
+  const fetchUserData = async () => {
+    try {
+      if (!token) {
+        console.warn('토큰 없음: 로그인 필요');
+        return;
+      }
+
+      const res = await axios.get('https://halpme.site/api/v1/members/my-page', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = res.data.data;
+
+      setForm(prev => ({
+        ...prev,
+        name: data.nickname || '',
+        phone: data.phoneNumber || '',
+        age: data.age?.toString() || '',
+        zipcode: data.address?.zipCode || '',
+        address: data.address?.basicAddress || '',
+        addressDetail: data.address?.detailAddress || '',
+        direction: data.address?.direction || ''
+      }));
+
+      console.log('사용자 정보 가져오기 성공 후 저장', data);
+    } catch (error) {
+      console.error('회원정보 불러오기 실패:', error.response?.data || error);
+      alert('회원정보를 불러오지 못했습니다.');
+    }
+  };
+
+  if (isEdit) {
+    fetchUserData();
+  }
+}, [isEdit, token, setForm]);
+
+
 
 
   return (
@@ -122,16 +192,18 @@ const Signup = () => {
           <Row>
             <FormGroup style={{ flex: 1 }}>
               <Label>나이</Label>
-              <Input name="age" value={form.age} onChange={handleChange} placeholder="6자리를 입력해주세요" />
+              <Input name="age" value={form.age} onChange={handleChange} placeholder="나이를 입력하세요 예) 25" />
             </FormGroup>
 
-            <FormGroup>
-              <Label>성별</Label>
-              <GenderRow>
-                <GenderButton selected={form.gender === '남'} onClick={() => setForm(prev => ({ ...prev, gender: '남' }))}>남</GenderButton>
-                <GenderButton selected={form.gender === '여'} onClick={() => setForm(prev => ({ ...prev, gender: '여' }))}>여</GenderButton>
-              </GenderRow>
-            </FormGroup>
+            {!isEdit && (
+              <FormGroup>
+                <Label>성별</Label>
+                <GenderRow>
+                  <GenderButton selected={form.gender === '남'} onClick={() => setForm(prev => ({ ...prev, gender: '남' }))}>남</GenderButton>
+                  <GenderButton selected={form.gender === '여'} onClick={() => setForm(prev => ({ ...prev, gender: '여' }))}>여</GenderButton>
+                </GenderRow>
+              </FormGroup>
+            )}
           </Row>
 
           <FormGroup>
