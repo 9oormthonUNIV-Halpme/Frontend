@@ -14,7 +14,7 @@ import PostList from './pages/PostList';
 import PostDetail from './pages/PostDetail';
 import HelpHistoryPage from './pages/HelpHistoryPage';
 import VolunteerHistoryPage from './pages/VolunteerHistoryPage';
-import Honor from './pages/Honor'; // 추가된 Honor 페이지
+import Honor from './pages/Honor'; 
 
 import './App.css';
 
