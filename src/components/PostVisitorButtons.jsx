@@ -13,7 +13,6 @@ const PostVisitorButtons = ({ postId }) => {
 
     const handleChatClick = async () => {
         if(!token) return;
-
         setLoading(true);
         setError(null);
 
@@ -25,6 +24,7 @@ const PostVisitorButtons = ({ postId }) => {
             );
 
             const chatroomId = response.data.data.chatRoomId;
+            //console.log("채팅방 생성 후 정보", response.data.data.chatRoomId);
             console.log("채팅방 생성 성공", chatroomId);
             navigate(`/chat/${chatroomId}`);
         }
