@@ -34,4 +34,19 @@ export const formatHourMinute = (timeString) => {
   const minuteFormatted = minute.toString().padStart(2, '0');
   const period = isAM ? '오전' : '오후';
   return `${period} ${hour12}: ${minuteFormatted}`;
+}
+export const formatMonthDay = (date) => {
+  const [year, month, day] = date.split("-");
+  return `${parseInt(month)}월 ${parseInt(day)}일`;
+};  
+
+export const formatTimeRange = (startTime, endTime) => {
+  const format = (time) => {
+    const [hour, min] = time.split(":");
+    const hourParse = parseInt(hour);
+    const period = hour < 12 ? "오전" : "오후";
+    const formattedHour = (hourParse % 12 === 0) ? 12 : hourParse % 12;
+    return `${period} ${formattedHour}:${min}`;
+  }
+  return `${format(startTime)}~${format(endTime)}`;
 };

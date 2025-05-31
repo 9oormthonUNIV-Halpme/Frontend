@@ -11,11 +11,13 @@ const PostList = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
+    if(!token) return;
+    
     axios.get('https://halpme.site/api/v1/posts', {
       headers: { Authorization: `Bearer ${token}` }
     })
     .then(res => {
-      console.log('📦 응답 데이터:', res.data);
+      //console.log('📦 응답 데이터:', res.data);
       setPosts(res.data.data);
     })
     .catch(err => {
