@@ -30,11 +30,10 @@ class App extends Component {
                   <Route path="/home" element={<Home />} />
                   <Route path="/writing" element={<Writing />} />
                   <Route path="/chat-list" element={<ChatList />} />
-                  <Route path="/chat" element={<Chat />} />
                   <Route path="/my-page" element={<MyPage />} />
                   <Route path="/post-list" element={<PostList />} />
                   <Route path="/post/:postId" element={<PostDetail />} />
-                  <Route path="/post-detail" element={<PostDetail />} />
+                  <Route path="/chat/:chatroomId" element={<Chat />} />
                 </Routes>
               </SignupProvider>
             </WebSocketProvider>

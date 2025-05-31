@@ -1,10 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import styled from 'styled-components';
+import profileImg from "./../assets/HalpmeLogo.svg";
 
 export default function ChatItem({ item }) {
+  const navigate = useNavigate();
   const { lastMessage, unreadCount } = item;
-  const nickname = item.participants[0] || '상대방';
-  const profileImage = "/favicon.ico";
+  const nickname = item.opponentNickname || '상대방';
 
   const formatTime = (isoString) => {
     const messageDate = new Date(isoString);
@@ -25,9 +28,12 @@ export default function ChatItem({ item }) {
     }
   };
 
+  const handleClick = () => {
+    navigate(`/chat/${item.roomId}`);
+  };
   return (
-    <ChatItemContainer>
-      <ProfileImage src={profileImage} alt="프로필" />
+    <ChatItemContainer onClick={handleClick} >
+      <ProfileImage src={profileImg} alt="프로필" />
       <ChatContent>
         <TopRow>
           <Nickname>{nickname}</Nickname>
