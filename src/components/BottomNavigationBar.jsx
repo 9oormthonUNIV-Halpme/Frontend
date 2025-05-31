@@ -1,6 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import homeIcon from "./../assets/homeIcon.png";
+import chatIcon from "./../assets/chatIcon.png";
+import memberIcon from "./../assets/memberIcon.png";
 
 const BottomNavigationBar = () => {
   const navigate = useNavigate();
@@ -8,15 +11,15 @@ const BottomNavigationBar = () => {
   return (
     <NavContainer>
       <NavItem onClick={() => navigate('/home')}>
-        <Icon src="/favicon.ico" alt="홈" />
+        <Icon src={homeIcon} alt="홈" />
         <Label>홈</Label>
       </NavItem>
-      <NavItem onClick={() => navigate('/chat')}>
-        <Icon src="/favicon.ico" alt="채팅" />
+      <NavItem onClick={() => navigate('/chat-list')}>
+        <Icon src={chatIcon} alt="채팅" />
         <Label>채팅</Label>
       </NavItem>
       <NavItem onClick={() => navigate('/my-page')}>
-        <Icon src="/favicon.ico" alt="회원정보" />
+        <Icon src={memberIcon} alt="회원정보" />
         <Label>회원정보</Label>
       </NavItem>
     </NavContainer>

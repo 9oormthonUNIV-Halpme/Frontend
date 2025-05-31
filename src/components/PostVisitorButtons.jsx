@@ -1,11 +1,11 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 
-const PostVisitorButtons = () => {
+const PostVisitorButtons = (postId) => {
     const navigate = useNavigate();
 
     const handleChatClick = () => {
-        navigate("/chat");
+        navigate(`/chat/${postId}`);
     };
 
     return (
