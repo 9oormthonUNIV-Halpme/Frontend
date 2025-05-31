@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { formatMonthDay, formatTimeRange } from "../utils/timeFormat";
 
 import backIcon from "./../assets/BackIcon.png";
 import timeIcon from "./../assets/TimeIcon.png";
@@ -7,10 +8,10 @@ import dateIcon from "./../assets/DateIcon.png";
 
 const PostContent = ({ value }) => {
     const navigate = useNavigate();
-
+    //console.log("PostContent에 전달된 value:", value);
     if (!value || !value.address) return null;
 
-    const { address, title, requestDate, requestTime, content, nickname } = value;
+    const { address, title, requestDate, endHour, startHour, content, nickname } = value;
 
     const handleBack = () => {
         navigate(-1);
@@ -32,13 +33,13 @@ const PostContent = ({ value }) => {
                     <PostDateImg>
                         <img src={dateIcon} alt="date" />
                     </PostDateImg>
-                    <PostDateText>{requestDate}</PostDateText>
+                    <PostDateText>{formatMonthDay(requestDate)}</PostDateText>
                 </PostDate>
                 <PostTime>
                     <PostTimeImg>
                         <img src={timeIcon} alt="time" />
                     </PostTimeImg>
-                    <PostTimeText>{requestTime}</PostTimeText>
+                    <PostTimeText>{formatTimeRange(startHour, endHour)}</PostTimeText>
                 </PostTime>
             </PostDateTime>
 
@@ -94,6 +95,7 @@ const AddressText = styled.div`
     padding: 0px 8px;
     font-size: 24px;
     font-weight: bold;
+    text-align: left;
     color: #000000;
 `;
 
@@ -148,10 +150,11 @@ const PostDateImg = styled.div`
 `;
 
 const PostDateText = styled.div`
-    width: 120px;
+    width: 100%;
     height: 19px;
     padding-left: 10px;
     font-size: 16px;
+    font-weight: bold;
     align-items: center; 
 
     display: flex;
@@ -182,10 +185,11 @@ const PostTimeImg = styled.div`
 `;
 
 const PostTimeText = styled.div`
-    width: 120px;
+    width: 100%;
     height: 19px;
     padding-left: 10px;
     font-size: 16px;
+    font-weight: bold;
 
     display: flex;
     justify-content: flex-start;

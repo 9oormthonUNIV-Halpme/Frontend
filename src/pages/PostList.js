@@ -11,11 +11,13 @@ const PostList = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
+    if(!token) return;
+    
     axios.get('https://halpme.site/api/v1/posts', {
       headers: { Authorization: `Bearer ${token}` }
     })
     .then(res => {
-      console.log('📦 응답 데이터:', res.data);
+      //console.log('📦 응답 데이터:', res.data);
       setPosts(res.data.data);
     })
     .catch(err => {
@@ -29,7 +31,7 @@ const PostList = () => {
         <Region>개신동</Region>
         {Array.isArray(posts) && posts.map(post => (
           <PostItem
-            key={post.id}
+            key={post.postId}
             postId={post.postId}
             title={post.title}
             date={post.requestDate}
