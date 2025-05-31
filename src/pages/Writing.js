@@ -152,7 +152,7 @@ useEffect(() => {
               <ModalTitle>이대로 글을 올리시겠습니까?</ModalTitle>
               <ModalText>작성한 내용을 다시 한 번 확인해 주세요.</ModalText>
               <ModalButtons>
-                <ModalButton cancel onClick={closeModal}>취소</ModalButton>
+                <ModalButton $cancel onClick={closeModal}>취소</ModalButton>
                 <ModalButton onClick={submitToServer}>확인</ModalButton>
               </ModalButtons>
             </ModalBox>
@@ -204,8 +204,8 @@ const ModalButton = styled.button`
   padding: 10px 20px;
   border-radius: 8px;
   border: none;
-  background-color: ${props => props.cancel ? '#e0e0e0' : '#2B9E90'};
-  color: ${props => props.cancel ? '#000' : '#fff'};
+  background-color: ${props => props.$cancel ? '#e0e0e0' : '#2B9E90'};
+  color: ${props => props.$cancel ? '#000' : '#fff'};
   cursor: pointer;
   font-weight: bold;
 

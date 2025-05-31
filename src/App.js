@@ -12,6 +12,9 @@ import Chat from './pages/Chat';
 import MyPage from './pages/MyPage';
 import PostList from './pages/PostList';
 import PostDetail from './pages/PostDetail';
+import HelpHistoryPage from './pages/HelpHistoryPage';
+import VolunteerHistoryPage from './pages/VolunteerHistoryPage';
+import Honor from './pages/Honor'; 
 
 import './App.css';
 
@@ -34,6 +37,9 @@ class App extends Component {
                   <Route path="/post-list" element={<PostList />} />
                   <Route path="/post/:postId" element={<PostDetail />} />
                   <Route path="/chat/:chatroomId" element={<Chat />} />
+                  <Route path="/help-history" element={<HelpHistoryPage />} />
+                  <Route path="/volunteer-history" element={<VolunteerHistoryPage />} />
+                  <Route path="/honor" element={<Honor />} />
                 </Routes>
               </SignupProvider>
             </WebSocketProvider>

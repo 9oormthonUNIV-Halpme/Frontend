@@ -20,6 +20,21 @@ export const isSameMinute = (date1, date2) => {
   );
 };
 
+// ✅ 'HH:mm' 형식 전용 함수 추가
+export const formatHourMinute = (timeString) => {
+  if (!timeString) return '';
+  const [hourStr, minuteStr] = timeString.split(':');
+  const hour = parseInt(hourStr, 10);
+  const minute = parseInt(minuteStr, 10);
+
+  if (isNaN(hour) || isNaN(minute)) return ''; // 방어
+
+  const isAM = hour < 12;
+  const hour12 = hour % 12 || 12;
+  const minuteFormatted = minute.toString().padStart(2, '0');
+  const period = isAM ? '오전' : '오후';
+  return `${period} ${hour12}: ${minuteFormatted}`;
+}
 export const formatMonthDay = (date) => {
   const [year, month, day] = date.split("-");
   return `${parseInt(month)}월 ${parseInt(day)}일`;

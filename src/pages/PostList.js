@@ -49,6 +49,8 @@ const PostList = () => {
 
 export default PostList;
 
+
+
 // ===== styled-components =====
 const Wrapper = styled.div`
   width: 100%;
@@ -57,11 +59,14 @@ const Wrapper = styled.div`
   padding: 16px 12px 80px 12px; // 하단 네비 여백 고려
   overflow-y: auto;
   box-sizing: border-box;
+  text-align: left
+;
 `;
 
 const Region = styled.h2`
-  font-size: 22px;
+  font-size: 24px;
   font-weight: bold;
   margin: 16px 0;
-  text-align: center;
+  text-align: left;
+  padding-bottom: 20px;
 `;
