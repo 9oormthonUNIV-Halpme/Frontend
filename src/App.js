@@ -11,6 +11,9 @@ import Chat from './pages/Chat';
 import MyPage from './pages/MyPage';
 import PostList from './pages/PostList';
 import PostDetail from './pages/PostDetail';
+import HelpHistoryPage from './pages/HelpHistoryPage';
+import VolunteerHistoryPage from './pages/VolunteerHistoryPage';
+import Honor from './pages/Honor'; // 추가된 Honor 페이지
 
 
 // import logo from './logo.svg';
@@ -36,6 +39,10 @@ class App extends Component {
                 <Route path="/post-list" element={<PostList />} />
                 <Route path="/post/:postId" element={<PostDetail />} />
                 <Route path="/post-detail" element={<PostDetail />} />
+                <Route path="/help-history" element={<HelpHistoryPage />} />
+                <Route path="/volunteer-history" element={<VolunteerHistoryPage />} />
+                <Route path="/honor" element={<Honor />} />
+              
               </Routes>
             </SignupProvider>
           </AuthProvider>

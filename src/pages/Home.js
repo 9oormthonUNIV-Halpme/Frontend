@@ -39,7 +39,6 @@ const Home = () => {
             <Icon src={require('../assets/VolunteerIcon.png')} alt="봉사참여" />
             봉사참여
           </ActionButton>
-
         </ButtonWrapper>
         <NoticeBox>
           <Icon src={require('../assets/check.png')} alt="도움요청" />
@@ -102,9 +101,8 @@ const ModalOverlay = styled.div`
 const Icon = styled.img`
   width: 20px;
   height: 20px;
-  vertical-align: middle;
-  margin-right: 8px;
-  display: block;
+  margin-top: 4px; // 아이콘 위치 조정
+  margin-right: 8px; // 아이콘과 텍스트 사이 간격
 `;
 
 const Container = styled.div`
@@ -119,14 +117,20 @@ const Region = styled.h2`
   font-weight: bold;
   color: #000;
   margin-bottom: 16px;
+  padding-bottom: 50px;
+  padding-top: 10px;
+  text-align: left;
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 10px;
   margin-bottom: 20px;
-`;
+  border-radius: 12px;
 
+`;
 const ActionButton = styled.button`
   flex: 1;
   background-color: #3EC6B4; /* Brand_2 */
@@ -135,15 +139,16 @@ const ActionButton = styled.button`
   font-size: 16px;
   border: none;
   align-items: center
-  border-radius: 12px;
-   display: flex;             // ✅ 아이콘과 텍스트 나란히
+  border-radius: 30px;
+  display: flex;             // ✅ 아이콘과 텍스트 나란히
+  gap: 8px;
   font-weight: 600;
 `;
 
 const NoticeBox = styled.div`
   background-color: #B2ECE4; /* Brand_3 */
   color: #000;
-  padding: 14px;
+  padding: 10px;
   border-radius: 12px;
   font-size: 14px;
   margin-bottom: 30px;
