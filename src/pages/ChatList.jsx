@@ -20,7 +20,6 @@ const ChatList = () => {
     const fetchChatList = async () => {
       setLoading(true);
       try {
-        // 상대방 닉네임과 신분 API 호출
         const chatListRes = await axios.get(
           `https://halpme.site/api/v1/chatRoom/rooms`,
           { 

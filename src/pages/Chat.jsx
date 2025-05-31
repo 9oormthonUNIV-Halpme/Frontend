@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { WebSocketContext } from "../context/WebSocketContext";
 import axios from "axios";
@@ -11,28 +11,6 @@ import ChatInput from "../components/ChatInput";
 
 import backIcon from "./../assets/BackIcon.png";
 //import WebSocketDebugger from "../components/WebSocketDebugger"; // 디버깅용
-
-const mockApiResponse = {
-  status: 0,
-  success: true,
-  message: "string",
-  data: {
-    roomMakerEmail: "maker@example.com",
-    guestEmail: "guest@example.com",
-    chatRoomId: "room-1234"
-  }
-};
-
-const mockOpponent = {
-  status: 0,
-  success: true,
-  message: "string",
-  data: {
-    opponentNickname: "userB",
-    identity: "봉사신청"
-  }
-};
-
 
 const mockChat = [
   {
@@ -55,145 +33,19 @@ const mockChat = [
     "readStatus": "true",
     "createdAt": "2025-05-29T10:00:10.000Z"
   },
-  {
-    "id": 3,
-    "roomId": "room1",
-    "sender": "테스트",
-    "message": "혹시 자료 보셨나요?",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:01:00.000Z"
-  },
-  {
-    "id": 4,
-    "roomId": "room1",
-    "sender": "userB",
-    "message": "네, 방금 확인했어요.",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:01:15.000Z"
-  },
-  {
-    "id": 5,
-    "roomId": "room1",
-    "sender": "userB",
-    "message": "괜찮은 것 같아요!",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:01:20.000Z"
-  },
-  {
-    "id": 6,
-    "roomId": "room1",
-    "sender": "테스트",
-    "message": "다행이네요 😊",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:02:00.000Z"
-  },
-  {
-    "id": 7,
-    "roomId": "room1",
-    "sender": "테스트",
-    "message": "시간 괜찮으시면 오늘 회의 가능할까요?",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:02:30.000Z"
-  },
-  {
-    "id": 8,
-    "roomId": "room1",
-    "sender": "userB",
-    "message": "네 오늘 오후 3시 어때요?",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:03:00.000Z"
-  },
-  {
-    "id": 9,
-    "roomId": "room1",
-    "sender": "테스트",
-    "message": "좋아요. 그때 뵈어요!",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:03:30.000Z"
-  },
-  {
-    "id": 10,
-    "roomId": "room1",
-    "sender": "userB",
-    "message": "네~ 회의 링크 보내드릴게요.",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:04:00.000Z"
-  },
-  {
-    "id": 11,
-    "roomId": "room1",
-    "sender": "userB",
-    "message": "https://meet.example.com/abc123",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:04:10.000Z"
-  },
-  {
-    "id": 12,
-    "roomId": "room1",
-    "sender": "테스트",
-    "message": "링크 확인했습니다!",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:05:00.000Z"
-  },
-  {
-    "id": 13,
-    "roomId": "room1",
-    "sender": "테스트",
-    "message": "그때 뵐게요~ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "false",
-    "createdAt": "2025-05-29T10:05:15.000Z"
-  },
-  {
-    "id": 14,
-    "roomId": "room1",
-    "sender": "userB",
-    "message": "넵 감사합니다!",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "false",
-    "createdAt": "2025-05-29T10:05:30.000Z"
-  },
-  {
-    "id": 15,
-    "roomId": "room1",
-    "sender": "테스트트",
-    "message": "이따 뵐게요!ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "false",
-    "createdAt": "2025-05-29T10:06:00.000Z"
-  }
 ];
 
 
 const Chat = () => {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
+  const { chatroomId } = useParams();
   const currentUser = user?.nickname;
-  const opponentUser = mockOpponent.data.opponentNickname;
-  const isRequester = mockOpponent.data.identity === "도움요청"
+
+  const [opponentUser, setOpponentUser] = useState("");
+  const [isRequester, setIsRequester] = useState(false);
+  const [isApplied, setIsApplied] = useState(false);
+
   const [text, setText] = useState("");
   const textareaRef = useRef(null);
   const [chatMessages, setChatMessages] = useState([]);
@@ -206,11 +58,44 @@ const Chat = () => {
   const inputCameraRef = useRef(null);
   const inputGalleryRef = useRef(null);
 
-  const { chatRoomId: mockRoomId } = mockApiResponse.data;
   const { sendMessage, subscribe, markAsRead } = useContext(WebSocketContext);
   
   const handleBack = () => {
     navigate(-1);
+  };
+
+  const handleApply = async () => {
+    if(!token || !chatroomId) return;
+    if(isApplied) return;
+    setLoading(true);
+
+    try {
+      const postIdRes = await axios.get(
+        `https://halpme.site/api/v1/chatRoom/${chatroomId}/post`,
+        {
+          headers: { Authorization: `Bearer ${token}`},
+        }
+      );
+
+      const postId = postIdRes.data.data.postId;
+      console.log("포스트 아이디: ", postId);
+
+      const applyRes = await axios.post(
+        `https://halpme.site/api/v1/posts/{postId}/participate`,
+        {
+          headers: { Authorization: `Bearer: ${token}`},
+          pararms: { postId: postId },
+        }
+      );
+
+      setIsApplied(true);
+    }
+    catch (err) {
+
+    }
+    finally {
+      setLoading(false);
+    }
   };
 
   const adjustHeight = () => {
@@ -235,7 +120,6 @@ const Chat = () => {
 
   const uploadImgFilesToS3 = async (files) => {
     if(files.length === 0) return;
-    const token = localStorage.getItem("token");
     
     // 파일 개수 제한
     const formData = new FormData();
@@ -271,14 +155,16 @@ const Chat = () => {
     try {
       const result = await uploadImgFilesToS3(files);
       const imageUrls = result.data?.slice(0, 2);
-      //console.log("반환된 파일 정보: ", imageUrls);
+      // console.log("반환된 파일 정보: ", imageUrls);
 
       if(imageUrls && imageUrls.length > 0){
+        const filenames = imageUrls.map((url) => url.split("/").pop());
+        console.log("파일명만 추출: ", filenames);
         sendMessage({
-          roomId: mockRoomId,
+          roomId: chatroomId,
           message: "",
           messageType: "IMAGE",
-          imageUrls,
+          filenames,
         });
       }
       else {
@@ -306,7 +192,7 @@ const Chat = () => {
 
   const handleSend = () => {
     if (!text.trim()) return;
-    sendMessage({ roomId: mockRoomId, message: text.trim(), messageType: "TEXT" });
+    sendMessage({ roomId: chatroomId, message: text.trim(), messageType: "TEXT" });
     setText("");
     textareaRef.current.style.height = "48px";
   };
@@ -323,19 +209,47 @@ const Chat = () => {
   }, [text]);
 
   useEffect(() => {
-    const fetchMessage = async () => {
+    const fetchOpponentAndChat = async () => {
+      if(!token || !chatroomId) return;
+      //console.log("상대정보-챗방아이디: ", chatroomId);
+      if (!token || !chatroomId) {
+      console.warn("chatroomId 또는 token이 없음", chatroomId, token);
+      return;
+    }
+      setLoading(true);
+
       try {
-        setChatMessages(mockChat);
+        // 상대방 닉네임과 사용자 신분 API 호출
+        const opponentRes = await axios.get(
+          `https://halpme.site/api/v1/chatRoom/opponent-info`,
+          { 
+            headers: { Authorization: `Bearer ${token}` },
+            params: { roomId: chatroomId },
+          }
+        );
+        setOpponentUser(opponentRes.data.data.opponentNickname);
+        setIsRequester(opponentRes.data.data.identity !== "도움요청");
+        
+        // 채팅 기록 API 호출
+        const chatRes = await axios.get(
+          `https://halpme.site/api/v1/chatRoom/messages`,
+          { 
+            headers: { Authorization: `Bearer ${token}` },
+            params: { roomId: chatroomId },
+          }
+        );
+        console.log("메시지 출력", chatRes.data.data);
+        setChatMessages(chatRes.data.data);
         setLoading(false);
       }
-      catch {
-        setError("메시지를 불러오는 데 실패했습니다.");
+      catch (err) {
+        setError("채팅 메시지 요청 실패");
         setLoading(false);
       }
     };
 
-    fetchMessage();
-  }, []);
+    fetchOpponentAndChat();
+  }, [chatroomId, token]);
 
   // 카메라 메뉴 외 클릭시 메뉴 클로징
   useEffect(() => {
@@ -359,7 +273,7 @@ const Chat = () => {
   useEffect(() => {
     // 구독 콜백
     const unsub = subscribe(
-      mockRoomId,
+      chatroomId,
       (incoming) => {
         setChatMessages((prev) => [...prev, incoming]);
         // 메시지가 렌더링되면 읽음 처리
@@ -374,7 +288,7 @@ const Chat = () => {
     );
 
     return () => unsub?.();
-  }, [subscribe, mockRoomId, markAsRead]);
+  }, [subscribe, chatroomId, markAsRead]);
 
   return (
     <ChatLayout>
@@ -386,7 +300,12 @@ const Chat = () => {
 
         <NicknameText>{opponentUser}</NicknameText>
 
-        {isRequester ? <ApplyButton>신청</ApplyButton> : null}
+        {isRequester 
+          ? (<ApplyButton onClick={handleApply} disabled={isApplied || loading}>
+              {isApplied ? "신청 완료" : (loading ? "신청 중..." : "신청")}
+            </ApplyButton>) 
+          : null
+        }
         
       </ChatHeader>
 
@@ -468,11 +387,11 @@ const ApplyButton = styled.button`
   margin-right: 8px;
   border-radius: 20px; 
   border: 1px solid #3EC6B4;
-  background-color: white;
+  background-color: ${(props) => (props.applied ? "#3EC6B4" : "white")};
   font-size: 16px;
   font-weight: bold;
   text-align: center;
-  color: #3ec6b4;
+  color: ${(props) => (props.applied ? "white" : "#3EC6B4")};
 `;
 
 const ChatBody = styled.div`
