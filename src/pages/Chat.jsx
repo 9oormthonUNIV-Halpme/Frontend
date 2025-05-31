@@ -12,30 +12,6 @@ import ChatInput from "../components/ChatInput";
 import backIcon from "./../assets/BackIcon.png";
 //import WebSocketDebugger from "../components/WebSocketDebugger"; // 디버깅용
 
-const mockChat = [
-  {
-    "id": 1,
-    "roomId": "room1",
-    "sender": "테스트",
-    "message": "안녕하세요!",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "false",
-    "createdAt": "2025-05-29T10:00:00.000Z"
-  },
-  {
-    "id": 2,
-    "roomId": "room1",
-    "sender": "userB",
-    "message": "안녕하세요~ 반가워요.",
-    "imageUrls": [],
-    "messageType": "TEXT",
-    "readStatus": "true",
-    "createdAt": "2025-05-29T10:00:10.000Z"
-  },
-];
-
-
 const Chat = () => {
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
@@ -60,6 +36,8 @@ const Chat = () => {
 
   const { sendMessage, subscribe, markAsRead } = useContext(WebSocketContext);
   
+  const chatBodyRef = useRef(null);
+
   const handleBack = () => {
     navigate(-1);
   };
@@ -138,8 +116,9 @@ const Chat = () => {
           },
         }
       );
-      console.log("S3 업로드 성공: ", response.data);
-      return response.data;
+      console.log("S3 업로드 성공1: ", response.data.data);
+
+      return response.data.data;
     }
     catch (error) {
       console.error("S3 업로드 실패: ", error);
@@ -154,17 +133,17 @@ const Chat = () => {
 
     try {
       const result = await uploadImgFilesToS3(files);
-      const imageUrls = result.data?.slice(0, 2);
-      // console.log("반환된 파일 정보: ", imageUrls);
+      //const imgUrls = result.data?.slice(0, 2);
+      // console.log("반환된 파일 정보: ", imgUrls;
 
-      if(imageUrls && imageUrls.length > 0){
-        const filenames = imageUrls.map((url) => url.split("/").pop());
-        console.log("파일명만 추출: ", filenames);
+      if(result && result.length > 0){
+        //const imageUrls = imageUrls.map((url) => url.split("/").pop());
+        console.log("파일명만 추출: ", result);
         sendMessage({
           roomId: chatroomId,
           message: "",
           messageType: "IMAGE",
-          filenames,
+          imageUrls: result,
         });
       }
       else {
@@ -201,6 +180,14 @@ const Chat = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const scrollToBottom = () => {
+    const el = chatBodyRef.current;
+    if (el) {
+      // 직접 scrollTop을 scrollHeight로 설정해도 됩니다.
+      el.scrollTop = el.scrollHeight;
     }
   };
 
@@ -290,6 +277,19 @@ const Chat = () => {
     return () => unsub?.();
   }, [subscribe, chatroomId, markAsRead]);
 
+  useEffect(() => {
+    const handle = window.requestAnimationFrame(() => {
+      scrollToBottom();
+    });
+    return () => window.cancelAnimationFrame(handle);
+  }, [chatMessages]);
+  
+  useEffect(() => {
+    if (!loading && chatMessages.length > 0) {
+      scrollToBottom();
+    }
+  }, [loading]);
+
   return (
     <ChatLayout>
        {/*디버깅용 <WebSocketDebugger /> */}
@@ -309,7 +309,7 @@ const Chat = () => {
         
       </ChatHeader>
 
-      <ChatBody>
+      <ChatBody ref={chatBodyRef}>
         {loading 
           ? (<p>불러오는 중...</p>) 
           : error 
@@ -318,6 +318,7 @@ const Chat = () => {
                   messages={chatMessages} 
                   currentUser={currentUser}
                   opponentUser={opponentUser}
+                  chatroomId={chatroomId}
               />)
         }
       </ChatBody>
@@ -398,12 +399,19 @@ const ChatBody = styled.div`
   border: none;
   flex: 1;
   width: 100%;
-  height: 500px;
-  
+  background-color: #F5F5F5;
+
   overflow-y: auto;
+
+  /* 부모 높이 보장 위해 min-height 추가 */
+  min-height: 200px;
+
+  /* 또는 고정 높이 예시 (필요 시) */
+  /* height: calc(100vh - 120px); */
+
   &::-webkit-scrollbar {
     width: 0px;
-    background: transparent; /* Optional: 스크롤바 배경 제거 */
+    background: transparent;
   }
   scrollbar-width: none;
   -ms-overflow-style: none;
