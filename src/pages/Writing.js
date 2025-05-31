@@ -103,7 +103,6 @@ useEffect(() => {
   const closeModal = () => setShowModal(false);
 
   return (
-    <MobileLayout>
     <AppWrapper>
       <Content>
         <FormWrapper>
@@ -162,7 +161,6 @@ useEffect(() => {
 
       </Content>
     </AppWrapper>
-  </MobileLayout>
   );
 };
 
