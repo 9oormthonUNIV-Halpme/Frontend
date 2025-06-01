@@ -48,7 +48,6 @@ const Chat = () => {
     setLoading(true);
 
     try {
-      console.log("dddddddddddddddddddddd")
       const postIdRes = await axios.get(
         `https://halpme.site/api/v1/chatRoom/${chatroomId}/post`,
         {
@@ -57,7 +56,7 @@ const Chat = () => {
         }
       );
       const postId = postIdRes.data.data.postId;
-      console.log("포스트 아이디: ", postId);
+      // console.log("신청 버튼 - 포스트 아이디: ", postId);
 
       const applyRes = await axios.post(
         `https://halpme.site/api/v1/posts/${postId}/participate`,
@@ -67,12 +66,16 @@ const Chat = () => {
           params: { postId: postId },
         },
       );
-      console.log("신청 반환 값: ", applyRes);
-
+      console.log("신청 버튼 - 신청 반환 값: ", applyRes);
+      if (applyRes.data.status === 201) {
+        alert("봉사자가 되셨습니다.");
+      }
       setIsApplied(true);
     }
     catch (err) {
       console.log("신청버튼 오류: ", err);
+      alert("이미 완료된 봉사입니다.");
+      setIsApplied(true);
     }
     finally {
       setLoading(false);
@@ -193,6 +196,44 @@ const Chat = () => {
       el.scrollTop = el.scrollHeight;
     }
   };
+
+  // 렌더링 시 신청 여부를 ui에 적용용
+  // useEffect(() => {
+  //   const checkApplyStatus = async () => {
+  //     if(!token || !chatroomId) return;
+
+  //     try {
+  //       const postIdRes = await axios.get(
+  //         `https://halpme.site/api/v1/chatRoom/${chatroomId}/post`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}`},
+  //           params: { chatroomId: chatroomId },
+  //         }
+  //       );
+  //       const postId = postIdRes.data.data.postId;
+  //       console.log("신청상태 체크 - 포스트 아이디: ", postId);
+
+  //       const applyRes = await axios.get(
+  //         `https://halpme.site/api/v1/posts/${postId}/participate`,
+  //         {},
+  //         {
+  //           headers: { Authorization: `Bearer ${token}`},
+  //           params: { postId: postId },
+  //         },
+  //       );
+
+  //       console.log("신청상태 체크 - 신청 반환 값: ", applyRes);
+
+
+  //     }
+  //     catch (err) {
+  //       console.error("신청 불가 상태: ", err);
+  //       //setIsApplied(true);
+  //     }
+  //   };
+
+  //   checkApplyStatus();
+  // }, [token, chatroomId]);
 
   useEffect(() => {
     adjustHeight();
