@@ -20,7 +20,6 @@ const ChatList = () => {
     const fetchChatList = async () => {
       setLoading(true);
       try {
-
         const chatListRes = await axios.get(
           `https://halpme.site/api/v1/chatRoom/rooms`,
           { 
