@@ -1,17 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 import styled from "styled-components";
 import { formatTime, isSameMinute } from "../utils/timeFormat";
 import profileImgIcon from "../assets/HalpmeLogo.svg";
 
-const ChatMessageList = ({ messages, currentUser }) => {
-  if (!currentUser) {
-    return null;
-  }
+const ChatMessageList = ({ messages }) => {
+  const { email } = useContext(AuthContext);
+  console.log("챗메시지목록-이메일 확인: ", email);
+
 
   return (
     <ChatContainer>
       {messages.map((msg, index) => {
-        const isCurrentUser = msg.sender === currentUser;
+        const isCurrentUser = msg.sender === email;
         const hasImage = Array.isArray(msg.imageUrls) && msg.imageUrls.length > 0;
         const timeText = formatTime(msg.createdAt);
         const nextMsg = messages[index + 1];
