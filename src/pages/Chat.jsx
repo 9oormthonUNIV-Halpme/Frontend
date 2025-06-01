@@ -1,4 +1,3 @@
-// ✅ Chat.jsx 전체 수정 완료본
 import React, { useState, useRef, useEffect, useContext } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -45,16 +44,33 @@ const Chat = () => {
     setLoading(true);
 
     try {
-      await axios.post(
-        `https://halpme.site/api/v1/posts/${passedPostId}/participate`,
+      const postIdRes = await axios.get(
+        `https://halpme.site/api/v1/chatRoom/${chatroomId}/post`,
+        {
+          headers: { Authorization: `Bearer ${token}`},
+          params: { chatroomId: chatroomId },
+        }
+      );
+      const postId = postIdRes.data.data.postId;
+      // console.log("신청 버튼 - 포스트 아이디: ", postId);
+
+      const applyRes = await axios.post(
+        `https://halpme.site/api/v1/posts/${postId}/participate`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      addPostId(passedPostId);
+      console.log("신청 버튼 - 신청 반환 값: ", applyRes);
+      if (applyRes.data.status === 201) {
+        alert("봉사자가 되셨습니다.");
+      }
       setIsApplied(true);
-    } catch (err) {
-      console.error("참여 실패", err);
-    } finally {
+    }
+    catch (err) {
+      // console.log("신청버튼 오류: ", err);
+      alert("이미 완료된 봉사입니다.");
+      setIsApplied(true);
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -66,22 +82,103 @@ const Chat = () => {
     textareaRef.current.style.height = "48px";
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const scrollToBottom = () => {
+    const el = chatBodyRef.current;
+    if (el) {
+      // 직접 scrollTop을 scrollHeight로 설정해도 됩니다.
+      el.scrollTop = el.scrollHeight;
+    }
+  };
+
+  //렌더링 시 신청 여부를 ui에 적용용
   useEffect(() => {
-    const fetchChatInfo = async () => {
-      if (!token || !chatroomId) return;
-      setLoading(true);
+    const checkApplyStatus = async () => {
+      if(!token || !chatroomId) return;
+
       try {
-        const res = await axios.get(`https://halpme.site/api/v1/chatRoom/opponent-info`, {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { roomId: chatroomId }
-        });
-        const identity = res.data.data.identity;
-        const isVolunteer = identity === "도움요청";
-        setIsRequester(isVolunteer);
-        setOpponentUser(res.data.data.opponentNickname);
-      } catch (err) {
-        console.error("상대방 정보 불러오기 실패", err);
-      } finally {
+        const postIdRes = await axios.get(
+          `https://halpme.site/api/v1/chatRoom/${chatroomId}/post`,
+          {
+            headers: { Authorization: `Bearer ${token}`},
+            params: { chatroomId: chatroomId },
+          }
+        );
+        const targetPostId = postIdRes.data.data.postId;
+        console.log("신청상태 체크 - 포스트 아이디: ", targetPostId);
+
+        const postsRes = await axios.get(
+          `https://halpme.site/api/v1/posts`,
+          {
+            headers: { Authorization: `Bearer ${token}`},
+          }
+        );
+        const postList = postsRes.data.data;
+        const matchedPost = postList.find(post => post.postId === targetPostId)
+        
+        // 아무도 신청하지 않았을 경우, null
+        // 신청하고 난 뒤, AUTHENTICATED
+        console.log("내가 알고 싶은 신청상태값: ", matchedPost.status);
+        if(matchedPost.status === null) setIsApplied(false);
+        else if(matchedPost.status === "AUTHENTICATED") setIsApplied(true);
+        else if(matchedPost.status === "COMPLETED") setIsApplied(true);
+
+      }
+      catch (err) {
+        console.error("신청 불가 상태: ", err);
+        setIsApplied(true);
+      }
+    };
+
+    checkApplyStatus();
+  }, [token, chatroomId]);
+
+  useEffect(() => {
+    adjustHeight();
+  }, [text]);
+
+  useEffect(() => {
+    const fetchOpponentAndChat = async () => {
+      if(!token || !chatroomId) return;
+      //console.log("상대정보-챗방아이디: ", chatroomId);
+      if (!token || !chatroomId) {
+      console.warn("chatroomId 또는 token이 없음", chatroomId, token);
+      return;
+    }
+      setLoading(true);
+
+      try {
+        // 상대방 닉네임과 사용자 신분 API 호출
+        const opponentRes = await axios.get(
+          `https://halpme.site/api/v1/chatRoom/opponent-info`,
+          { 
+            headers: { Authorization: `Bearer ${token}` },
+            params: { roomId: chatroomId },
+          }
+        );
+        setOpponentUser(opponentRes.data.data.opponentNickname);
+        setIsRequester(opponentRes.data.data.identity !== "도움요청");
+        
+        // 채팅 기록 API 호출
+        const chatRes = await axios.get(
+          `https://halpme.site/api/v1/chatRoom/messages`,
+          { 
+            headers: { Authorization: `Bearer ${token}` },
+            params: { roomId: chatroomId },
+          }
+        );
+        console.log("메시지 출력", chatRes.data.data);
+        setChatMessages(chatRes.data.data);
+        setLoading(false);
+      }
+      catch (err) {
+        setError("채팅 메시지 요청 실패");
         setLoading(false);
       }
     };
