@@ -1,72 +1,98 @@
 import React, { useEffect, useState, useContext } from 'react';
+import { useParticipation } from "../context/ParticipationContext";
 import axios from 'axios';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import MobileLayout from '../components/MobileLayout';
 import BottomNavigationBar from '../components/BottomNavigationBar';
-import BackIcon from '../assets/BackIcon.png';
 import HistoryItem from '../components/HistoryItem';
 
 const HelpHistoryPage = () => {
   const [data, setData] = useState([]);
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
+const { isParticipated } = useParticipation();
+ useEffect(() => {
+  axios.get('https://halpme.site/api/v1/posts/my-request', {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  .then((res) => {
+    console.log('📦 전체 응답:', res.data.data);
 
-  useEffect(() => {
-    axios.get('https://halpme.site/api/v1/posts/my-request', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then((res) => {
-      const list = res.data.data.map(item => ({
+    const list = res.data.data.map(item => {
+      const status = item.postStatus ?? (isParticipated(item.postId) ? 'AUTHENTICATED' : 'WAITING');
+      return {
         postId: item.postId,
         title: item.title,
         date: item.requestDate,
         startTime: item.startHour,
         endTime: item.endHour,
         nickname: item.nickname,
-        postStatus: item.postStatus
-      }));
-      setData(list);
-    })
-    .catch(err => {
-      console.error(err);
+        postStatus: status,
+      };
     });
-  }, [token]);
 
-  const handleStatusChange = (postId) => {
-    setData(prev =>
-      prev.map(item => {
-        if (item.postId !== postId) return item;
-        const nextStatus = getNextStatus(item.postStatus);
-        return { ...item, postStatus: nextStatus };
-      })
-    );
-  };
+    setData(list);
+  })
+  .catch(err => {
+    console.error(err);
+  });
+}, [token, isParticipated]); // ✅ 여기가 useEffect 끝
+
+
+  const handleStatusChange = async (postId, currentStatus) => {
+  if (currentStatus === 'AUTHENTICATED') {
+    try {
+      await axios.post(
+        `https://halpme.site/api/v1/posts/${postId}/authenticate`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setData(prev =>
+        prev.map(item =>
+          item.postId === postId
+            ? { ...item, postStatus: 'COMPLETED' }
+            : item
+        )
+      );
+    } catch (err) {
+      console.error('인증 실패:', err);
+    }
+  }
+};
+
 
   return (
     <MobileLayout>
       <Wrapper>
         <Header>
-          <BackButton onClick={() => navigate('/my-page')}>
-            <img src={BackIcon} alt="뒤로가기" />
-          </BackButton>
+          <BackIcon onClick={() => navigate(-1)}>
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7.89258 13.3027L1.89258 7.30273L7.89258 1.30273" stroke="#1E1E1E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </BackIcon>
           <TitleText>도움요청 내역</TitleText>
         </Header>
         <List>
-          {data.map(post => (
-          <HistoryItem
-            key={post.postId}
-            postId={post.postId}
-            title={post.title}
-            date={post.date}
-            startTime={post.startTime}
-            endTime={post.endTime}
-            postStatus={post.postStatus}
-            onStatusChange={handleStatusChange}
-          />
-        ))}
+          {data.map(post => {
+            console.log('🧾 postStatus:', post.postStatus); // ✅ 중괄호로 감싸면 정상 작동
+            return (
+              <HistoryItem
+                key={post.postId}
+                title={post.title}
+                date={post.date}
+                startTime={post.startTime}
+                endTime={post.endTime}
+                postStatus={post.postStatus}
+                postId={post.postId}
+                viewerType="requester"
+                onStatusChange={handleStatusChange}
+              />
 
+            );
+          })}
         </List>
       </Wrapper>
       <BottomNavigationBar />
@@ -125,3 +151,13 @@ const List = styled.div`
   flex-direction: column;
   gap: 12px;
 `;
+
+const BackIcon = styled.div`
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+`;
+

@@ -3,34 +3,45 @@ import styled from 'styled-components';
 import { formatHourMinute } from '../utils/timeFormat';
 import { formatDate } from '../utils/dateFormat';
 
-const HistoryItem = ({ title, date, startTime, endTime, postStatus, onStatusChange, postId }) => {
-  const handleStatusClick = () => {
-    onStatusChange?.(postId);
+const HistoryItem = ({ title, date, startTime, endTime, postStatus, onStatusChange, postId, viewerType = 'requester' }) => {
+  const statusLabelMap = {
+    requester: {
+      WAITING: '대기 중',
+      AUTHENTICATED: '인증하기',
+      COMPLETED: '완료',
+    },
+    volunteer: {
+      AUTHENTICATED: '진행 중',
+      COMPLETED: '인증 완료',
+    },
   };
 
-  const statusLabel = {
-    REQUESTED: '대기 중',
-    IN_PROGRESS: '진행중',
-    WAITING: '인증하기',
-    AUTHENTICATED: '완료',
-    COMPLETED: '완료'
-  }[postStatus];
+  const label = statusLabelMap[viewerType]?.[postStatus];
 
-  return (
+  const handleStatusClick = () => {
+    if (viewerType === 'requester' && postStatus === 'AUTHENTICATED') {
+      onStatusChange?.(postId, postStatus);
+    }
+  };
+
+   return (
     <ItemWrapper>
       <TextWrapper>
         <Title>{title}</Title>
-        <DateText>{formatDate(date)} {formatHourMinute(startTime)} ~ {formatHourMinute(endTime)}</DateText>
+        <DateText>
+          {formatDate(date)} {formatHourMinute(startTime)} ~ {formatHourMinute(endTime)}
+        </DateText>
       </TextWrapper>
-      <StatusButton status={postStatus} onClick={handleStatusClick}>
-        {statusLabel}
-      </StatusButton>
+      {label && (
+        <StatusButton status={postStatus} disabled={viewerType === 'volunteer'}>
+          {label}
+        </StatusButton>
+      )}
     </ItemWrapper>
   );
 };
 
 export default HistoryItem;
-
 
 // 스타일
 const ItemWrapper = styled.div`
@@ -62,21 +73,42 @@ const DateText = styled.div`
 `;
 
 const StatusButton = styled.button`
-  padding: 6px 12px;
+  width: 60px;
+  height: 25px;
+  border-radius: 6px;
+  padding: 0 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 13px;
-  border-radius: 12px;
+  font-weight: 500;
+  gap: 10px;
   border: none;
-  white-space: nowrap;
-  margin-left: 12px;
+  cursor: pointer;
 
-  background-color: ${({ status }) =>
-    status === 'AUTHENTICATED' || status === 'COMPLETED'
-      ? '#ccc'
-      : status === 'IN_PROGRESS'
-      ? '#ffcc80'
-      : '#3EC6B4'};
-  color: ${({ status }) =>
-    status === 'AUTHENTICATED' || status === 'COMPLETED'
-      ? '#000'
-      : '#fff'};
+  ${({ status }) => {
+    switch (status) {
+      case 'WAITING':
+        return `
+          background-color: #E6F4F1;
+          color: #3AAFA9;
+        `;
+      case 'AUTHENTICATED':
+        return `
+          background-color: #3AAFA9;
+          color: white;
+        `;
+      case 'COMPLETED':
+        return `
+          background-color: #E6F4F1;
+          color: #3AAFA9;
+          border: 1px solid #3AAFA9;
+        `;
+      default:
+        return `
+          background-color: #ccc;
+          color: white;
+        `;
+    }
+  }}
 `;
