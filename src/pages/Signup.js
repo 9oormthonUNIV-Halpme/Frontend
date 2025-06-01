@@ -1,10 +1,10 @@
 import axios from 'axios'; // 파일 상단에 추가
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import styled from 'styled-components';
-import logo from '../logo.svg';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSignup } from '../context/SignupContext';
 import { AuthContext } from '../context/AuthContext'; 
+import Modal from '../components/Modal';
 
 const Signup = () => {
   const location = useLocation(); 
@@ -12,6 +12,8 @@ const Signup = () => {
   const navigate = useNavigate();
   const { form, setForm } = useSignup();
   const { token } = useContext(AuthContext); 
+  const [modalOpen, setModalOpen] = useState(false);
+const [modalMessage, setModalMessage] = useState('');
 
 
   const handleChange = (e) => {
@@ -65,8 +67,8 @@ const Signup = () => {
         role: 'ROLE_MEMBER'
       });
 
-      alert('회원가입이 완료되었습니다!');
-      navigate('/');
+      setModalMessage('회원가입이 완료되었습니다!');
+      setModalOpen(true);
     } catch (error) {
       console.error('회원가입 실패:', error.response?.data || error);
       alert('회원가입에 실패했습니다. 다시 시도해주세요.');
@@ -96,7 +98,8 @@ const Signup = () => {
     }
   );
 
-    alert('회원정보가 수정되었습니다!');
+    setModalMessage('회원정보가 수정되었습니다!');
+    setModalOpen(true);
     navigate('/edit-profile');
   } catch (error) {
     console.error('회원정보 수정 실패:', error.response?.data || error);
@@ -104,6 +107,24 @@ const Signup = () => {
   }
   }
 };
+
+useEffect(() => {
+  if (!isEdit) {
+    setForm({
+      name: '',
+      phone: '',
+      age: '',
+      gender: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      zipcode: '',
+      address: '',
+      addressDetail: '',
+      direction: '',
+    });
+  }
+}, [isEdit, setForm]);
 
   useEffect(() => {
     const savedAddress = localStorage.getItem('selectedAddress');
@@ -257,6 +278,15 @@ useEffect(() => {
           )}
         </FormWrapper>
       </Content>
+       <Modal
+      isOpen={modalOpen}
+      message={modalMessage}
+      onClose={() => setModalOpen(false)}
+      onConfirm={() => {
+        setModalOpen(false);
+        navigate(isEdit ? '/edit-profile' : '/');
+      }}
+    />
     </AppWrapper>
   );
 };

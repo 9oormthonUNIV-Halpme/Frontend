@@ -7,14 +7,14 @@ import MobileLayout from '../components/MobileLayout';
 import BottomNavigationBar from '../components/BottomNavigationBar'; // ✅ 추가
 
 const Home = () => {
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [score, setScore] = useState(0);
   const [remainingCategory, setRemainingCategory] = useState(1);
 
   useEffect(() => {
-    axios.get('/api/user/score', {
+    axios.get('https://halpme.site/api/v1/rank/my-points', {
       headers: { Authorization: `Bearer ${token}` }
     })
     .then(res => {
@@ -40,21 +40,21 @@ const Home = () => {
             봉사참여
           </ActionButton>
         </ButtonWrapper>
-        <NoticeBox>
-          <Icon src={require('../assets/check.png')} alt="도움요청" />
-          봉사 인증을 해주세요. <br />
-          <strong>2025년 6월 22일</strong>
-        </NoticeBox>
+      
         <Divider />
-        <SectionTitle>🌱 새싹 도우미</SectionTitle>
-        <ScoreText>이웃에게 <strong>{score}번</strong>의 손을 내밀었어요.</ScoreText>
+    <RankHeaderRow>
+      <RankIcon src={require('../assets/Lankplant.png')} alt="새싹도우미" />
+      <SectionTitle>새싹 도우미</SectionTitle>
+    </RankHeaderRow>
+
+        <ScoreText>{user?.nickname || '사용자'}님의 현재 점수는 <strong>{score}점</strong>입니다.</ScoreText>
         <Badge>활동카테고리 {remainingCategory}번 남았어요!</Badge>
         <ProgressBarWrapper>
           <ProgressBarInner style={{ width: `${(10 - remainingCategory) * 10}%` }} />
         </ProgressBarWrapper>
         <DoubleButtonWrapper>
-          <HalfButton onClick={() => navigate('/transfer')}>명예의 전당</HalfButton>
-<HalfButton onClick={() => setIsModalOpen(true)}>랭크 설명</HalfButton>
+          <PrimaryButton onClick={() => navigate('/honor')}>명예의 전당</PrimaryButton>
+          <SecondaryButton onClick={() => setIsModalOpen(true)}>랭크 설명</SecondaryButton>
 
 {isModalOpen && (
   <ModalOverlay onClick={() => setIsModalOpen(false)}>
@@ -64,19 +64,80 @@ const Home = () => {
         <CloseButton onClick={() => setIsModalOpen(false)}>✕</CloseButton>
       </ModalHeader>
       <RankList>
-        <RankItem><span>🌱 새싹 도우미</span> - 기본등급</RankItem>
-        <RankItem>🔥 활동가 - 누적 봉사 시간 <strong>10시간</strong> 이상</RankItem>
-        <RankItem>🏡 마을지킴이 - 누적 <strong>30시간</strong></RankItem>
-        <RankItem>📍 지역리더 - 누적 <strong>60시간</strong></RankItem>
-        <RankItem>⭐ 영웅 - 누적 <strong>100시간</strong></RankItem>
-      </RankList>
+  <RankItem>
+    <RankRow>
+      <RankIcon src={require('../assets/Lankplant.png')} alt="새싹도우미" />
+      <RankText>
+        <RankName>새싹도우미</RankName>
+        <RankDesc>기본등급</RankDesc>
+      </RankText>
+    </RankRow>
+  </RankItem>
+  <RankItem>
+    <RankRow>
+      <RankIcon src={require('../assets/Lankhand.png')} alt="활동가" />
+      <RankText>
+        <RankName>활동가</RankName>
+        <RankDesc>누적 봉사 시간 <RankHighlight>10시간</RankHighlight> 이상</RankDesc>
+      </RankText>
+    </RankRow>
+  </RankItem>
+  <RankItem>
+    <RankRow>
+      <RankIcon src={require('../assets/Lankprotect.png')} alt="마을지킴이" />
+      <RankText>
+        <RankName>마을지킴이</RankName>
+        <RankDesc>누적 봉사 시간 <RankHighlight>30시간</RankHighlight> 이상</RankDesc>
+      </RankText>
+    </RankRow>
+  </RankItem>
+  <RankItem>
+    <RankRow>
+      <RankIcon src={require('../assets/Lankfind.png')} alt="지역리더" />
+      <RankText>
+        <RankName>지역리더</RankName>
+        <RankDesc>누적 봉사 시간 <RankHighlight>60시간</RankHighlight> 이상</RankDesc>
+      </RankText>
+    </RankRow>
+  </RankItem>
+  <RankItem>
+    <RankRow>
+      <RankIcon src={require('../assets/Lankstar.png')} alt="영웅" />
+      <RankText>
+        <RankName>영웅</RankName>
+        <RankDesc>누적 봉사 시간 <RankHighlight>100시간</RankHighlight> 이상</RankDesc>
+      </RankText>
+    </RankRow>
+  </RankItem>
+</RankList>
+
+
+
+      <RankGuideTitle>랭크는 어떻게 적용되나요?</RankGuideTitle>
+
       <InfoText>
-        ✅ 봉사 시간이 쌓이면 자동으로 랭크가 올라갑니다. <br />
-        ✅ 내 등급은 마이페이지에서 확인할 수 있어요.
+        <NoticeLine>
+          <DotIcon src={require('../assets/Lankdot.png')} alt="체크" />
+          봉사 시간 1시간 당 1점으로 계산됩니다.
+        </NoticeLine>
+        <NoticeLine>
+          <DotIcon src={require('../assets/Lankdot.png')} alt="체크" />
+          봉사 시간이 자동으로 누적돼요.
+        </NoticeLine>
+        <NoticeLine>
+          <DotIcon src={require('../assets/Lankdot.png')} alt="체크" />
+          누적 시간이 일정 기준에 도달하면 자동으로 단계가 올라가요.
+        </NoticeLine>
+        <NoticeLine>
+          <DotIcon src={require('../assets/Lankdot.png')} alt="체크" />
+          내 등급은 홈 화면이나 마이페이지에서 확인할 수 있어요.
+        </NoticeLine>
       </InfoText>
     </RankModal>
   </ModalOverlay>
 )}
+
+
        </DoubleButtonWrapper>
       </Container>
       <BottomNavigationBar /> 
@@ -99,8 +160,8 @@ const ModalOverlay = styled.div`
 `;
 
 const Icon = styled.img`
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   margin-top: 4px; // 아이콘 위치 조정
   margin-right: 8px; // 아이콘과 텍스트 사이 간격
 `;
@@ -124,34 +185,62 @@ const Region = styled.h2`
 
 const ButtonWrapper = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 8px; /* 버튼 사이 간격 */
   margin-bottom: 20px;
-  border-radius: 12px;
-
 `;
+
 const ActionButton = styled.button`
-  flex: 1;
-  background-color: #3EC6B4; /* Brand_2 */
-  color: #fff;
-  padding: 30px;
+  width: 156px;
+  height: 96px;
+  background-color: #3EC6B4;
+  color: white;
   font-size: 16px;
+  font-weight: bold;
   border: none;
-  align-items: center
-  border-radius: 30px;
-  display: flex;             // ✅ 아이콘과 텍스트 나란히
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 8px;
-  font-weight: 600;
+  cursor: pointer;
 `;
 
-const NoticeBox = styled.div`
-  background-color: #B2ECE4; /* Brand_3 */
+const NoticeLine = styled.div`
+  display: flex;
+  align-items: left;
+  gap: 8px;
+  margin-bottom: 6px;
   color: #000;
-  padding: 10px;
-  border-radius: 12px;
+  font-size: 13px;
+`;
+
+
+const PrimaryButton = styled.button`
+  width: 90px;
+  height: 40px;
+  background-color: #2F4858;
+  color: white;
   font-size: 14px;
-  margin-bottom: 30px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 0 10px;
+  cursor: pointer;
+`;
+
+const SecondaryButton = styled.button`
+  width: 90px;
+  height: 40px;
+  background-color: #F2F2F2;
+  color: #888888;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;h
+  border-radius: 6px;
+  padding: 0 10px;
+  cursor: pointer;
 `;
 
 const Divider = styled.hr`
@@ -162,26 +251,28 @@ const Divider = styled.hr`
 `;
 
 const SectionTitle = styled.h3`
-  font-size: 18px;
+  font-size: 24px;
   font-weight: bold;
   color: #000;
   margin-bottom: 8px;
+  text-align: left;
+  line-height: 1;
 `;
 
 const ScoreText = styled.p`
-  font-size: 14px;
+  font-size: 16px;
   color: #000;
   margin-bottom: 8px;
+  text-align: left;
 `;
 
 const Badge = styled.div`
-  display: inline-block;
-  background-color: #C8FFF0;
   color: #2B9E90; /* Brand_1 */
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 12px;
+  text-align: left;
 `;
 
 const ProgressBarWrapper = styled.div`
@@ -200,29 +291,82 @@ const ProgressBarInner = styled.div`
 
 const DoubleButtonWrapper = styled.div`
   display: flex;
-  gap: 10px;
-`;
-
-const HalfButton = styled.button`
-  flex: 1;
-  background-color: #e0f7fa;
-  border: 1px solid #3EC6B4;
-  border-radius: 12px;
-  padding: 12px;
-  font-weight: 600;
-  font-size: 14px;
-  color: #000;
+  justify-content: center;  // ✅ 가운데 정렬
+  align-items: center;
+  gap: 20px;                 // 버튼 사이 간격 (Figma 기준)
+  margin-top: 12px;
 `;
 
 const RankModal = styled.div`
   width: 90%;
-  max-width: 320px;
+  max-width: 380px;  // ✅ 너비 확장
   background-color: #ffffff;
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   z-index: 1000;
 `;
+
+const RankRow = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const RankIcon = styled.img`
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  vertical-align: middle;
+`;
+const RankText = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 20px;  // ✅ 랭크명과 설명 사이 간격
+`;
+const RankName = styled.div`
+  font-weight: bold;
+  color: #000;
+  font-size: 14px;
+  min-width: 70px;  // ✅ 균일한 정렬을 위해 고정 너비 설정
+`;
+
+const RankDesc = styled.div`
+  color: #888888;
+  font-size: 14px;
+  margin-left: 40px;
+`;
+const RankHighlight = styled.strong`
+  color: #2B9E90;
+  font-weight: bold;
+`;
+
+const RankHeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 9px; // 아이콘과 텍스트 사이 간격
+  margin-bottom: 20px;
+`;
+
+const DotIcon = styled.img`
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  margin-top: 2px;
+  flex-shrink: 0;
+`;
+
+const RankGuideTitle = styled.div`
+  font-size: 14px;
+  font-weight: bold;
+  color: #000;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  text-align: left;
+  gap: 30px;
+`;
+
 
 
 const ModalHeader = styled.div`
@@ -254,6 +398,7 @@ const RankList = styled.ul`
 const RankItem = styled.li`
   font-size: 14px;
   margin-bottom: 12px;
+  text-align: left;
   color: #2B9E90;
 
   span {
@@ -262,16 +407,13 @@ const RankItem = styled.li`
     color: #000;
   }
 
-  strong {
-    color: #000;
-  }
+ 
 `;
 
 const InfoText = styled.div`
   font-size: 13px;
   margin-top: auto;
-  color: #555;
-  background-color: #f9f9f9;
+  color: #000;
   padding: 12px;
   border-radius: 10px;
   line-height: 1.5;

@@ -15,6 +15,7 @@ import PostDetail from './pages/PostDetail';
 import HelpHistoryPage from './pages/HelpHistoryPage';
 import VolunteerHistoryPage from './pages/VolunteerHistoryPage';
 import Honor from './pages/Honor'; 
+import { ParticipationProvider} from './context/ParticipationContext'; 
 
 import './App.css';
 
@@ -26,21 +27,23 @@ class App extends Component {
           <AuthProvider>
             <WebSocketProvider>
               <SignupProvider>
-                <Routes>
-                  <Route path="/" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/edit-profile" element={<Signup />} />
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/writing" element={<Writing />} />
-                  <Route path="/chat-list" element={<ChatList />} />
-                  <Route path="/my-page" element={<MyPage />} />
-                  <Route path="/post-list" element={<PostList />} />
-                  <Route path="/post/:postId" element={<PostDetail />} />
-                  <Route path="/chat/:chatroomId" element={<Chat />} />
-                  <Route path="/help-history" element={<HelpHistoryPage />} />
-                  <Route path="/volunteer-history" element={<VolunteerHistoryPage />} />
-                  <Route path="/honor" element={<Honor />} />
-                </Routes>
+                <ParticipationProvider>
+                  <Routes>
+                    <Route path="/" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/edit-profile" element={<Signup />} />
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/writing" element={<Writing />} />
+                    <Route path="/chat-list" element={<ChatList />} />
+                    <Route path="/my-page" element={<MyPage />} />
+                    <Route path="/post-list" element={<PostList />} />
+                    <Route path="/post/:postId" element={<PostDetail />} />
+                    <Route path="/chat/:chatroomId" element={<Chat />} />
+                    <Route path="/help-history" element={<HelpHistoryPage />} />
+                    <Route path="/volunteer-history" element={<VolunteerHistoryPage />} />
+                    <Route path="/honor" element={<Honor />} />
+                  </Routes>
+                </ParticipationProvider>
               </SignupProvider>
             </WebSocketProvider>
           </AuthProvider>
@@ -49,6 +52,5 @@ class App extends Component {
     );
   }
 }
-
 
 export default App;
