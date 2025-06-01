@@ -48,28 +48,31 @@ const Chat = () => {
     setLoading(true);
 
     try {
+      console.log("dddddddddddddddddddddd")
       const postIdRes = await axios.get(
         `https://halpme.site/api/v1/chatRoom/${chatroomId}/post`,
         {
           headers: { Authorization: `Bearer ${token}`},
+          params: { chatroomId: chatroomId },
         }
       );
-
       const postId = postIdRes.data.data.postId;
       console.log("포스트 아이디: ", postId);
 
       const applyRes = await axios.post(
-        `https://halpme.site/api/v1/posts/{postId}/participate`,
+        `https://halpme.site/api/v1/posts/${postId}/participate`,
+        {},
         {
-          headers: { Authorization: `Bearer: ${token}`},
-          pararms: { postId: postId },
-        }
+          headers: { Authorization: `Bearer ${token}`},
+          params: { postId: postId },
+        },
       );
+      console.log("신청 반환 값: ", applyRes);
 
       setIsApplied(true);
     }
     catch (err) {
-
+      console.log("신청버튼 오류: ", err);
     }
     finally {
       setLoading(false);
