@@ -1,15 +1,21 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import BottomNavigationBar from '../components/BottomNavigationBar';
 import MobileLayout from '../components/MobileLayout';
 import { FaUserEdit, FaHandsHelping, FaMedal } from 'react-icons/fa';
-import { MdVolunteerActivism } from 'react-icons/md';
 import VI from '../assets/VI.png';
-
-
+import { AuthContext } from '../context/AuthContext'; // ✅ AuthContext import
 
 const MyPage = () => {
+  const navigate = useNavigate();
+  const { logout } = useContext(AuthContext); // ✅ logout 함수 사용
+
+  const handleLogout = () => {
+    logout();             // ✅ 토큰, 유저 정보 초기화
+    navigate('/');   // ✅ 로그인 페이지로 이동
+  };
+
   return (
     <MobileLayout>
       <Header>
@@ -19,12 +25,11 @@ const MyPage = () => {
       <MenuWrapper>
         <MenuItem to="/edit-profile"><FaUserEdit />회원정보 수정</MenuItem>
         <MenuItem to="/help-history"><FaHandsHelping />도움요청 내역</MenuItem>
-        <MenuItem to="/volunteer-history"><Icon src={VI} alt="봉사참여 내역" />
-          봉사참여 내역</MenuItem>
+        <MenuItem to="/volunteer-history"><Icon src={VI} alt="봉사참여 내역" />봉사참여 내역</MenuItem>
         <MenuItem to="/honor"><FaMedal />명예의 전당</MenuItem>
       </MenuWrapper>
 
-      <LogoutButton>로그아웃</LogoutButton>
+      <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
 
       <BottomNavigationBar />
     </MobileLayout>
@@ -88,8 +93,6 @@ const MenuItem = styled(Link)`
     flex-shrink: 0;
   }
 `;
-
-
 
 const LogoutButton = styled.button`
   margin: 24px auto;
