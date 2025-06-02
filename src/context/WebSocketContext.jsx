@@ -66,15 +66,14 @@ export const WebSocketProvider = ({ children }) => {
     }, []);
 
   // 읽음 처리 함수
-  const markAtRead = useCallback((chatId) => {
-    if(!stompClientRef.current?.connected){
-        console.warn("웹소켓 연결 실패");
-        return;
-    }
+const markAtRead = useCallback((roomId) => {
+  if (!stompClientRef.current?.connected) {
+    console.warn("웹소켓 연결 실패");
+    return;
+  }
 
-    stompClientRef.current.send("/pub/read", {}, JSON.stringify(chatId));
-  });   
-
+  stompClientRef.current.send("/pub/read-room", {}, roomId); // ← JSON.stringify 쓰지 마세요!
+}, []);
 
   // 채팅방 Subscribe 함수
   const subscribe = useCallback((roomId, onMessage, onReadStatus) => {
@@ -102,7 +101,9 @@ export const WebSocketProvider = ({ children }) => {
     }
 
     // 첫 입장 시 마지막 미읽음 메시지 한 건만 읽음 처리하면 전체 읽음 처리
-    stompClientRef.current.send("/pub/read", {}, JSON.stringify(roomId));
+   stompClientRef.current.send("/pub/read-room", {}, roomId); // ← 그냥 문자열로!
+
+
 
     // un-subscribe 콜백 반환
     return (() => {

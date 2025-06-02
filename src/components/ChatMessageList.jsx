@@ -6,8 +6,6 @@ import profileImgIcon from "../assets/HalpmeLogo.svg";
 
 const ChatMessageList = ({ messages }) => {
   const { email } = useContext(AuthContext);
-  console.log("챗메시지목록-이메일 확인: ", email);
-
 
   return (
     <ChatContainer>
@@ -18,17 +16,22 @@ const ChatMessageList = ({ messages }) => {
         const nextMsg = messages[index + 1];
         const prevMsg = messages[index - 1];
         const isLastInGroup = !nextMsg || nextMsg.sender !== msg.sender;
-        
-        // 타임스탬프 표시 여부
+
         const isLastOfSameMinute =
           !nextMsg ||
           nextMsg.sender !== msg.sender ||
           !isSameMinute(msg.createdAt, nextMsg.createdAt);
 
-        // 프로필 이미지 표시 여부 (이전 메시지와 보낸 사람이 다르면 true)
         const showProfileImage =
           !isCurrentUser &&
           (!prevMsg || prevMsg.sender !== msg.sender);
+
+        // ✅ 나의 메시지면서 아직 안 읽혔고, 다음 메시지가 내 메시지가 아닐 때만 표시
+const shouldShowRead = isCurrentUser &&
+  !msg.readStatus &&
+  (!nextMsg || nextMsg.sender !== email);
+
+ console.log("ReadStatus:", msg.readStatus, typeof msg.readStatus);
 
         return (
           <MessageRow key={index} isCurrentUser={isCurrentUser} isLastInGroup={isLastInGroup}>
@@ -36,16 +39,16 @@ const ChatMessageList = ({ messages }) => {
               {!isCurrentUser && showProfileImage && (
                 <ProfileImage src={msg.profileImageUrl || profileImgIcon} alt="프로필 이미지" />
               )}
-              {!isCurrentUser && !showProfileImage && <ProfileSpacer />} 
+              {!isCurrentUser && !showProfileImage && <ProfileSpacer />}
 
               {isCurrentUser ? (
                 <>
-                  {isLastOfSameMinute && <Timestamp isCurrentUser={isCurrentUser}>{timeText}</Timestamp>}
-                  {msg.readStatus === "false" && <ReadStatus>1</ReadStatus>}
+                  {isLastOfSameMinute && <Timestamp>{timeText}</Timestamp>}
+                  {shouldShowRead && <ReadStatus>1</ReadStatus>}
                   <MessageBubble isCurrentUser={isCurrentUser}>
                     {hasImage
                       ? msg.imageUrls.map((url, i) => (
-                          <MessageImage key={i} src={url} alt="전송 이미지" isCurrentUser={isCurrentUser} />
+                          <MessageImage key={i} src={url} alt="전송 이미지" />
                         ))
                       : <MessageText isCurrentUser={isCurrentUser}>{msg.message}</MessageText>
                     }
@@ -56,13 +59,12 @@ const ChatMessageList = ({ messages }) => {
                   <MessageBubble isCurrentUser={isCurrentUser}>
                     {hasImage
                       ? msg.imageUrls.map((url, i) => (
-                          <MessageImage key={i} src={url} alt="전송 이미지" isCurrentUser={isCurrentUser} />
+                          <MessageImage key={i} src={url} alt="전송 이미지" />
                         ))
                       : <MessageText isCurrentUser={isCurrentUser}>{msg.message}</MessageText>
                     }
                   </MessageBubble>
-                  {msg.readStatus === "false" && <ReadStatus>1</ReadStatus>}
-                  {isLastOfSameMinute && <Timestamp isCurrentUser={isCurrentUser}>{timeText}</Timestamp>}
+                  {isLastOfSameMinute && <Timestamp>{timeText}</Timestamp>}
                 </>
               )}
             </MessageWrapper>

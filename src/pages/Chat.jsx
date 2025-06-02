@@ -34,7 +34,7 @@ const Chat = () => {
   const inputCameraRef = useRef(null);
   const inputGalleryRef = useRef(null);
 
-  const { sendMessage, subscribe, markAsRead } = useContext(WebSocketContext);
+  const { sendMessage, subscribe, markAtRead } = useContext(WebSocketContext);
   
   const chatBodyRef = useRef(null);
 
@@ -48,6 +48,7 @@ const Chat = () => {
     setLoading(true);
 
     try {
+      console.log("dddddddddddddddddddddd")
       const postIdRes = await axios.get(
         `https://halpme.site/api/v1/chatRoom/${chatroomId}/post`,
         {
@@ -56,7 +57,7 @@ const Chat = () => {
         }
       );
       const postId = postIdRes.data.data.postId;
-      // console.log("신청 버튼 - 포스트 아이디: ", postId);
+      console.log("포스트 아이디: ", postId);
 
       const applyRes = await axios.post(
         `https://halpme.site/api/v1/posts/${postId}/participate`,
@@ -66,16 +67,12 @@ const Chat = () => {
           params: { postId: postId },
         },
       );
-      console.log("신청 버튼 - 신청 반환 값: ", applyRes);
-      if (applyRes.data.status === 201) {
-        alert("봉사자가 되셨습니다.");
-      }
+      console.log("신청 반환 값: ", applyRes);
+
       setIsApplied(true);
     }
     catch (err) {
-      // console.log("신청버튼 오류: ", err);
-      alert("이미 완료된 봉사입니다.");
-      setIsApplied(true);
+      console.log("신청버튼 오류: ", err);
     }
     finally {
       setLoading(false);
@@ -197,48 +194,6 @@ const Chat = () => {
     }
   };
 
-  //렌더링 시 신청 여부를 ui에 적용용
-  useEffect(() => {
-    const checkApplyStatus = async () => {
-      if(!token || !chatroomId) return;
-
-      try {
-        const postIdRes = await axios.get(
-          `https://halpme.site/api/v1/chatRoom/${chatroomId}/post`,
-          {
-            headers: { Authorization: `Bearer ${token}`},
-            params: { chatroomId: chatroomId },
-          }
-        );
-        const targetPostId = postIdRes.data.data.postId;
-        console.log("신청상태 체크 - 포스트 아이디: ", targetPostId);
-
-        const postsRes = await axios.get(
-          `https://halpme.site/api/v1/posts`,
-          {
-            headers: { Authorization: `Bearer ${token}`},
-          }
-        );
-        const postList = postsRes.data.data;
-        const matchedPost = postList.find(post => post.postId === targetPostId)
-        
-        // 아무도 신청하지 않았을 경우, null
-        // 신청하고 난 뒤, AUTHENTICATED
-        console.log("내가 알고 싶은 신청상태값: ", matchedPost.status);
-        if(matchedPost.status === null) setIsApplied(false);
-        else if(matchedPost.status === "AUTHENTICATED") setIsApplied(true);
-        else if(matchedPost.status === "COMPLETED") setIsApplied(true);
-
-      }
-      catch (err) {
-        console.error("신청 불가 상태: ", err);
-        setIsApplied(true);
-      }
-    };
-
-    checkApplyStatus();
-  }, [token, chatroomId]);
-
   useEffect(() => {
     adjustHeight();
   }, [text]);
@@ -310,20 +265,26 @@ const Chat = () => {
     const unsub = subscribe(
       chatroomId,
       (incoming) => {
+         console.log("📩 수신 메시지 구조:", incoming);
         setChatMessages((prev) => [...prev, incoming]);
         // 메시지가 렌더링되면 읽음 처리
-        markAsRead(incoming.id);
+        markAtRead(chatroomId); 
       },
       // 읽음 상태 업데이트 필요 시
-      (readInfo) => {
-        setChatMessages((prev) =>
-          prev.map((c) => (c.id === readInfo.lastReadId ? { ...c, read: true } : c))
-        );
-      }
+       (readInfo) => {
+    // ✅ 상대방이 읽은 메시지 ID 목록이 올 경우
+    setChatMessages((prevMessages) =>
+      prevMessages.map((msg) =>
+        readInfo.readMessageIds.includes(msg.id)
+          ? { ...msg, readStatus: true } // ← 상태 업데이트!
+          : msg
+      )
+    );
+  }
     );
 
     return () => unsub?.();
-  }, [subscribe, chatroomId, markAsRead]);
+  }, [subscribe, chatroomId, markAtRead]);
 
   useEffect(() => {
     const handle = window.requestAnimationFrame(() => {
