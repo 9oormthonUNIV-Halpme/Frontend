@@ -26,21 +26,21 @@ class App extends Component {
           <AuthProvider>
             <WebSocketProvider>
               <SignupProvider>
-                  <Routes>
-                    <Route path="/" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/edit-profile" element={<Signup />} />
-                    <Route path="/home" element={<Home />} />
-                    <Route path="/writing" element={<Writing />} />
-                    <Route path="/chat-list" element={<ChatList />} />
-                    <Route path="/my-page" element={<MyPage />} />
-                    <Route path="/post-list" element={<PostList />} />
-                    <Route path="/post/:postId" element={<PostDetail />} />
-                    <Route path="/chat/:chatroomId" element={<Chat />} />
-                    <Route path="/help-history" element={<HelpHistoryPage />} />
-                    <Route path="/volunteer-history" element={<VolunteerHistoryPage />} />
-                    <Route path="/honor" element={<Honor />} />
-                  </Routes>
+                <Routes>
+                  <Route path="/" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/edit-profile" element={<Signup />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/writing" element={<Writing />} />
+                  <Route path="/chat-list" element={<ChatList />} />
+                  <Route path="/my-page" element={<MyPage />} />
+                  <Route path="/post-list" element={<PostList />} />
+                  <Route path="/post/:postId" element={<PostDetail />} />
+                  <Route path="/chat/:chatroomId" element={<Chat />} />
+                  <Route path="/help-history" element={<HelpHistoryPage />} />
+                  <Route path="/volunteer-history" element={<VolunteerHistoryPage />} />
+                  <Route path="/honor" element={<Honor />} />
+                </Routes>
               </SignupProvider>
             </WebSocketProvider>
           </AuthProvider>
