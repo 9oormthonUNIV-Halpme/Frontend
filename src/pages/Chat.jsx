@@ -244,8 +244,10 @@ const Chat = () => {
   }, [text]);
 
   useEffect(() => {
-  const fetchOpponentAndChat = async () => {
-    if (!token || !chatroomId) {
+    const fetchOpponentAndChat = async () => {
+      if(!token || !chatroomId) return;
+      //console.log("상대정보-챗방아이디: ", chatroomId);
+      if (!token || !chatroomId) {
       console.warn("chatroomId 또는 token이 없음", chatroomId, token);
       return;
     }
