@@ -3,7 +3,6 @@ import axios from 'axios';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { useParticipation } from '../context/ParticipationContext'; // ✅ 추가
 import MobileLayout from '../components/MobileLayout';
 import BottomNavigationBar from '../components/BottomNavigationBar';
 import HistoryItem from '../components/HistoryItem';
@@ -11,33 +10,41 @@ import HistoryItem from '../components/HistoryItem';
 const VolunteerHistoryPage = () => {
   const [data, setData] = useState([]);
   const { token } = useContext(AuthContext);
-const { isParticipated, addPostId } = useParticipation();  const navigate = useNavigate();
+ const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('https://halpme.site/api/v1/posts/my-volunteer', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then((res) => {
-      const list = res.data.data.map(item => {
-        const status = item.postStatus ?? (isParticipated(item.postId) ? 'AUTHENTICATED' : 'WAITING');
 
-        return {
-          postId: item.postId,
-          title: item.title,
-          date: item.requestDate,
-          startTime: item.startHour,
-          endTime: item.endHour,
-          nickname: item.nickname,
-          postStatus: status, // ✅ 보정된 상태 사용
-        };
-      });
+  axios.get('https://halpme.site/api/v1/posts/my-volunteer', {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  .then((res) => {
+      console.log("📦 참여한 글들:", res.data.data);
 
-      setData(list);
-    })
-    .catch(err => {
-      console.error(err);
+    const list = res.data.data.map(item => {
+      let status = item.postStatus;
+      if (!status || status === null) {
+        // 상태가 비어있을 경우 기본값 대기중 처리
+        status = 'WAITING';
+      }
+
+      return {
+        postId: item.postId,
+        title: item.title,
+        date: item.requestDate,
+        startTime: item.startHour,
+        endTime: item.endHour,
+        nickname: item.nickname,
+        postStatus: status,
+      };
     });
-  }, [token, isParticipated]);
+
+    setData(list);
+  })
+  .catch(err => {
+    console.error(err);
+  });
+}, [token]);
+
 
   return (
     <MobileLayout>
