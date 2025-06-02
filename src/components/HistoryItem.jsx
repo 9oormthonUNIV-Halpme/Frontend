@@ -19,10 +19,11 @@ const HistoryItem = ({ title, date, startTime, endTime, postStatus, onStatusChan
   const label = statusLabelMap[viewerType]?.[postStatus];
 
   const handleStatusClick = () => {
-    if (viewerType === 'requester' && postStatus === 'AUTHENTICATED') {
-      onStatusChange?.(postId, postStatus);
-    }
-  };
+  if (viewerType === 'requester' && postStatus === 'AUTHENTICATED') {
+    onStatusChange?.(postId, postStatus);
+  }
+};
+
 
    return (
     <ItemWrapper>
@@ -33,9 +34,14 @@ const HistoryItem = ({ title, date, startTime, endTime, postStatus, onStatusChan
         </DateText>
       </TextWrapper>
       {label && (
-        <StatusButton status={postStatus} disabled={viewerType === 'volunteer'}>
-          {label}
-        </StatusButton>
+        <StatusButton
+        status={postStatus}
+        disabled={viewerType !== 'requester' || postStatus !== 'AUTHENTICATED'}
+        onClick={handleStatusClick}
+      >
+        {label}
+      </StatusButton>
+
       )}
     </ItemWrapper>
   );
@@ -76,15 +82,17 @@ const StatusButton = styled.button`
   width: 60px;
   height: 25px;
   border-radius: 6px;
-  padding: 0 10px;
+  padding: 5px 10px;
   display: flex;
   justify-content: center;
   align-items: center;
+  text-align: center;
   font-size: 13px;
   font-weight: 500;
   gap: 10px;
   border: none;
   cursor: pointer;
+  white-space: nowrap;
 
   ${({ status }) => {
     switch (status) {
@@ -100,9 +108,8 @@ const StatusButton = styled.button`
         `;
       case 'COMPLETED':
         return `
-          background-color: #E6F4F1;
-          color: #3AAFA9;
-          border: 1px solid #3AAFA9;
+          background-color: #ccc;
+          color: #FFF;
         `;
       default:
         return `
