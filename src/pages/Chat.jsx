@@ -251,40 +251,42 @@ const Chat = () => {
       console.warn("chatroomId 또는 token이 없음", chatroomId, token);
       return;
     }
-      setLoading(true);
 
-      try {
-        // 상대방 닉네임과 사용자 신분 API 호출
-        const opponentRes = await axios.get(
-          `https://halpme.site/api/v1/chatRoom/opponent-info`,
-          { 
-            headers: { Authorization: `Bearer ${token}` },
-            params: { roomId: chatroomId },
-          }
-        );
-        setOpponentUser(opponentRes.data.data.opponentNickname);
-        setIsRequester(opponentRes.data.data.identity !== "도움요청");
-        
-        // 채팅 기록 API 호출
-        const chatRes = await axios.get(
-          `https://halpme.site/api/v1/chatRoom/messages`,
-          { 
-            headers: { Authorization: `Bearer ${token}` },
-            params: { roomId: chatroomId },
-          }
-        );
-        console.log("메시지 출력", chatRes.data.data);
-        setChatMessages(chatRes.data.data);
-        setLoading(false);
-      }
-      catch (err) {
-        setError("채팅 메시지 요청 실패");
-        setLoading(false);
-      }
-    };
+    setLoading(true);
 
-    fetchOpponentAndChat();
-  }, [chatroomId, token]);
+    try {
+      // 상대방 정보 요청
+      const opponentRes = await axios.get(
+        `https://halpme.site/api/v1/chatRoom/opponent-info`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { roomId: chatroomId },
+        }
+      );
+      setOpponentUser(opponentRes.data.data.opponentNickname);
+      setIsRequester(opponentRes.data.data.identity !== "도움요청");
+
+      // 채팅 기록 요청
+      const chatRes = await axios.get(
+        `https://halpme.site/api/v1/chatRoom/messages`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { roomId: chatroomId },
+        }
+      );
+      console.log("메시지 출력", chatRes.data.data);
+      setChatMessages(chatRes.data.data);
+    } catch (err) {
+      console.error(err);
+      setError("채팅 메시지 요청 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchOpponentAndChat();
+}, [chatroomId, token]);
+
 
   // 카메라 메뉴 외 클릭시 메뉴 클로징
   useEffect(() => {
@@ -526,4 +528,3 @@ const SendButton = styled.button`
         height: 24px;
     }
 `;
-

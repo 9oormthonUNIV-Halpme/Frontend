@@ -5,6 +5,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSignup } from '../context/SignupContext';
 import { AuthContext } from '../context/AuthContext'; 
 import Modal from '../components/Modal';
+import MobileLayout from '../components/MobileLayout';
 
 const Signup = () => {
   const location = useLocation(); 
@@ -13,7 +14,7 @@ const Signup = () => {
   const { form, setForm } = useSignup();
   const { token } = useContext(AuthContext); 
   const [modalOpen, setModalOpen] = useState(false);
-const [modalMessage, setModalMessage] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
 
 
   const handleChange = (e) => {
@@ -184,7 +185,7 @@ useEffect(() => {
 
 
   return (
-    <AppWrapper>
+    <MobileLayout>
       <Content>
         <FormWrapper>
            {isEdit && (
@@ -287,32 +288,20 @@ useEffect(() => {
         navigate(isEdit ? '/edit-profile' : '/');
       }}
     />
-    </AppWrapper>
+    </MobileLayout>
   );
 };
 
 export default Signup;
 
-const AppWrapper = styled.div`
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  background-color: #f5f5f5;
-  padding: 32px 16px;
-  box-sizing: border-box;
-`;
-
 const Content = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
   width: 100%;
-  max-width: 360px;
-  background-color: #FFFFFF;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  height: 100%;
   margin: 0 auto;
+  padding: 16px 12px 80px 12px; // 하단 네비 여백 고려
+  overflow-y: auto;
+  box-sizing: border-box;
+  text-align: left;
 `;
 
 const Title = styled.h2`
@@ -369,7 +358,7 @@ const Input = styled.input`
   color: #000;
   border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 12px;
   box-sizing: border-box;
 
   &:focus {
