@@ -34,14 +34,31 @@ const HelpHistoryPage = () => {
     });
   }, [token]);
 
-  const handleStatusChange = (postId) => {
-    setData(prev =>
-      prev.map(item => {
-        if (item.postId !== postId) return item;
-        const nextStatus = getNextStatus(item.postStatus);
-        return { ...item, postStatus: nextStatus };
-      })
-    );
+  const handleStatusChange = async (postId, currentStatus) => {
+    console.log('현재 상태:', currentStatus, '포스트 ID:', postId);
+    if (currentStatus === 'AUTHENTICATED') {
+      try {
+        await axios.post(
+          `https://halpme.site/api/v1/posts/${postId}/authenticate`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+
+        setData(prev =>
+          prev.map(item =>
+            item.postId === postId
+              ? { ...item, postStatus: 'COMPLETED' }
+              : item
+          )
+        );
+
+      setModalMessage('봉사가 인증되었습니다 ✅');
+      setIsModalOpen(true);
+      } catch (err) {
+        console.error('인증 실패:', err);
+      }
+    }
   };
 
   return (
@@ -76,16 +93,7 @@ const HelpHistoryPage = () => {
 
 export default HelpHistoryPage;
 
-const getNextStatus = (current) => {
-  switch (current) {
-    case 'REQUESTED': return 'IN_PROGRESS';
-    case 'IN_PROGRESS': return 'AUTHENTICATED';
-    case 'AUTHENTICATED': return 'AUTHENTICATED';
-    default: return 'REQUESTED';
-  }
-};
 
-// ===== styled-components =====
 const Wrapper = styled.div`
   width: 100%;
   height: 100%;

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import MobileLayout from '../components/MobileLayout';
-import BottomNavigationBar from '../components/BottomNavigationBar'; // ✅ 추가
+import BottomNavigationBar from '../components/BottomNavigationBar'; 
 
 const Home = () => {
   const { token, user } = useContext(AuthContext);
