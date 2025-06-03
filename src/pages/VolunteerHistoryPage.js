@@ -76,16 +76,6 @@ const VolunteerHistoryPage = () => {
 
 export default VolunteerHistoryPage;
 
-const getNextStatus = (current) => {
-  switch (current) {
-    case 'REQUESTED': return 'IN_PROGRESS';
-    case 'IN_PROGRESS': return 'AUTHENTICATED';
-    case 'AUTHENTICATED': return 'AUTHENTICATED';
-    default: return 'REQUESTED';
-  }
-};
-
-// ===== styled-components =====
 const Wrapper = styled.div`
   width: 100%;
   height: 100%;

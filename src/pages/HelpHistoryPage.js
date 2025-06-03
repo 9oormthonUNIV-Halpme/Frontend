@@ -12,6 +12,8 @@ const HelpHistoryPage = () => {
   const [data, setData] = useState([]);
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
     axios.get('https://halpme.site/api/v1/posts/my-request', {
