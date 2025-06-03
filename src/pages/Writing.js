@@ -8,7 +8,6 @@ import styled from "styled-components";
 import axios from 'axios';
 import MobileLayout from '../components/MobileLayout';
 import exite from '../assets/exite.png';
-import Modal from '../components/Modal';
 
 const Writing = () => {
 const location = useLocation();
@@ -104,7 +103,7 @@ useEffect(() => {
   const closeModal = () => setShowModal(false);
 
   return (
-    <MobileLayout>
+    <AppWrapper>
       <Content>
         <FormWrapper>
           <Header>
@@ -148,28 +147,93 @@ useEffect(() => {
         </FormWrapper>
 
         {showModal && (
-        <Modal
-          isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          onConfirm={submitToServer}
-          message="이대로 글을 올리시겠습니까?"
-        />
-      )}
+          <ModalOverlay>
+            <ModalBox>
+              <ModalTitle>이대로 글을 올리시겠습니까?</ModalTitle>
+              <ModalText>작성한 내용을 다시 한 번 확인해 주세요.</ModalText>
+              <ModalButtons>
+                <ModalButton $cancel onClick={closeModal}>취소</ModalButton>
+                <ModalButton onClick={submitToServer}>확인</ModalButton>
+              </ModalButtons>
+            </ModalBox>
+          </ModalOverlay>
+        )}
+
       </Content>
-    </MobileLayout>
+    </AppWrapper>
   );
 };
 
 export default Writing;
 
-const Content = styled.div`
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalBox = styled.div`
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+  width: 300px;
+`;
+
+const ModalTitle = styled.h3`
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+`;
+
+const ModalText = styled.p`
+  font-size: 14px;
+  margin-bottom: 20px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: space-around;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: ${props => props.$cancel ? '#e0e0e0' : '#2B9E90'};
+  color: ${props => props.$cancel ? '#000' : '#fff'};
+  cursor: pointer;
+  font-weight: bold;
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+const AppWrapper = styled.div`
   width: 100%;
-  height: 100%;
-  margin: 0 auto;
-  padding: 16px 12px 80px 12px; // 하단 네비 여백 고려
-  overflow-y: auto;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  background-color: #f5f5f5;
+  padding: 32px 16px;
   box-sizing: border-box;
-  text-align: left;
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 360px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  margin: 0 auto;
 `;
 
 const FormWrapper = styled.div`
@@ -248,6 +312,8 @@ const StyledInput = styled.input`
   }
 `;
 
+const DatePickerInput = StyledInput;
+
 const AddressRow = styled.div`
   width: 100%;
   display: flex;
@@ -256,7 +322,7 @@ const AddressRow = styled.div`
 `;
 
 const Button = styled.button`
-  width: 70%;
+  width: 50%;
   height: 50px;
   padding: 10px;
   border-radius: 8px;
@@ -275,7 +341,6 @@ const SubmitButton = styled.button`
   border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
-  margin-top: 20px;
 `;
 
 const Header = styled.div`

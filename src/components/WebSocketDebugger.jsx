@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { WebSocketContext } from "../context/WebSocketContext"; // 경로는 실제 위치에 맞게 수정
 
 const WebSocketDebugger = () => {
-  const { sendMessage, markAtRead, subscribe } = useContext(WebSocketContext);
+  const { sendMessage, markAsRead, subscribe } = useContext(WebSocketContext);
   const [isConnected, setIsConnected] = useState(false);
   const [roomId, setRoomId] = useState("test-room");
   const [message, setMessage] = useState("Hello from debugger!");
@@ -66,7 +66,7 @@ const WebSocketDebugger = () => {
 
         <button
           onClick={() => {
-            markAtRead(roomId);
+            markAsRead(roomId);
             console.log("👁 읽음 처리 요청 전송됨");
           }}
         >

@@ -26,7 +26,7 @@ const PostVisitorButtons = ({ postId }) => {
             const chatroomId = response.data.data.chatRoomId;
             //console.log("채팅방 생성 후 정보", response.data.data.chatRoomId);
             console.log("채팅방 생성 성공", chatroomId);
-            navigate(`/chat/${chatroomId}`, { state: { postId } });
+            navigate(`/chat/${chatroomId}`);
         }
         catch (err) {
             setError("채팅방 생성에 실패");

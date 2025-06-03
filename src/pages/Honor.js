@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import { AuthContext } from '../context/AuthContext';
-import BottomNavigationBar from '../components/BottomNavigationBar';
+import BottomNavigationBar from '../components/BottomNavigationBar'; 
 import { useNavigate } from 'react-router-dom';
 
 const medalIcons = [
@@ -184,3 +184,4 @@ const VolunteerHours = styled.div`
   text-align: left;
   padding: 4px 2px;
 `;
+
