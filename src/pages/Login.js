@@ -240,6 +240,7 @@ const ButtonContent = styled.div`
   flex-direction: column;
   gap: 10px;
   margin-top: 48px;
+  visibility: hidden;
 `;
 
 const GuideText = styled.p`
