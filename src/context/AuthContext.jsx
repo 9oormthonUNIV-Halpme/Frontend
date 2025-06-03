@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useMemo } from "react";
 import axios from "axios";
 
 export const AuthContext = createContext();
@@ -9,18 +9,47 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const email = useMemo(() => {
+    if (!token) return null;
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      //console.log("이메일 추출: ", JSON.parse(jsonPayload)?.sub);
+      return JSON.parse(jsonPayload)?.sub ?? null;
+    } catch (err) {
+      console.error("JWT 파싱 실패:", err);
+      return null;
+    }
+  }, [token]);
+
   // 앱 시작 시 로컬스토리지에서 토큰 읽어 로그인 상태 초기화
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     if (savedToken) {
       setToken(savedToken);
       setIsLoggedIn(true);
-      fetchUserInfo(savedToken).finally(() => setIsLoading(false));
     }
     else {
       setIsLoading(false);
     }
   }, []);
+
+  // 토큰 변경시 사용자 정보 fetch
+  useEffect(() => {
+    if(token) {
+      fetchUserInfo(token).finally(() => setIsLoading(false));
+    }
+    else {
+      setUser(null);
+      setIsLoading(false);
+    }
+  }, [token]);
 
   // 사용자 정보 불러오기 함수
   const fetchUserInfo = async (jwt) => {
@@ -74,6 +103,7 @@ export const AuthProvider = ({ children }) => {
     token,
     isLoggedIn,
     user,
+    email,
     login,
     logout,
     isLoading,

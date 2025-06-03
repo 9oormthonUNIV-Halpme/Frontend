@@ -1,17 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 import styled from "styled-components";
 import { formatTime, isSameMinute } from "../utils/timeFormat";
 import profileImgIcon from "../assets/HalpmeLogo.svg";
 
-const ChatMessageList = ({ messages, currentUser }) => {
-  if (!currentUser) {
-    return null;
-  }
+const ChatMessageList = ({ messages }) => {
+  const { email } = useContext(AuthContext);
+  // console.log("챗메시지목록-이메일 확인: ", email);
+
 
   return (
     <ChatContainer>
       {messages.map((msg, index) => {
-        const isCurrentUser = msg.sender === currentUser;
+        const isCurrentUser = msg.sender === email;
         const hasImage = Array.isArray(msg.imageUrls) && msg.imageUrls.length > 0;
         const timeText = formatTime(msg.createdAt);
         const nextMsg = messages[index + 1];
@@ -29,6 +30,9 @@ const ChatMessageList = ({ messages, currentUser }) => {
           !isCurrentUser &&
           (!prevMsg || prevMsg.sender !== msg.sender);
 
+        const shouldShowRead = isCurrentUser && !msg.readStatus;
+        console.log("ReadStatus: ", msg.readStatus, typeof msg.readStatus);
+
         return (
           <MessageRow key={index} isCurrentUser={isCurrentUser} isLastInGroup={isLastInGroup}>
             <MessageWrapper isCurrentUser={isCurrentUser}>
@@ -39,12 +43,12 @@ const ChatMessageList = ({ messages, currentUser }) => {
 
               {isCurrentUser ? (
                 <>
-                  {isLastOfSameMinute && <Timestamp isCurrentUser={isCurrentUser}>{timeText}</Timestamp>}
-                  {msg.readStatus === "false" && <ReadStatus>1</ReadStatus>}
+                  {isLastOfSameMinute && <Timestamp>{timeText}</Timestamp>}
+                  {shouldShowRead && <ReadStatus>1</ReadStatus>}
                   <MessageBubble isCurrentUser={isCurrentUser}>
                     {hasImage
                       ? msg.imageUrls.map((url, i) => (
-                          <MessageImage key={i} src={url} alt="전송 이미지" isCurrentUser={isCurrentUser} />
+                          <MessageImage key={i} src={url} alt="전송 이미지" />
                         ))
                       : <MessageText isCurrentUser={isCurrentUser}>{msg.message}</MessageText>
                     }
@@ -55,13 +59,12 @@ const ChatMessageList = ({ messages, currentUser }) => {
                   <MessageBubble isCurrentUser={isCurrentUser}>
                     {hasImage
                       ? msg.imageUrls.map((url, i) => (
-                          <MessageImage key={i} src={url} alt="전송 이미지" isCurrentUser={isCurrentUser} />
+                          <MessageImage key={i} src={url} alt="전송 이미지" />
                         ))
                       : <MessageText isCurrentUser={isCurrentUser}>{msg.message}</MessageText>
                     }
                   </MessageBubble>
-                  {msg.readStatus === "false" && <ReadStatus>1</ReadStatus>}
-                  {isLastOfSameMinute && <Timestamp isCurrentUser={isCurrentUser}>{timeText}</Timestamp>}
+                  {isLastOfSameMinute && <Timestamp>{timeText}</Timestamp>}
                 </>
               )}
             </MessageWrapper>

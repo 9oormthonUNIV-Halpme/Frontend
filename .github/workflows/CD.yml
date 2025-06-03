@@ -1,0 +1,52 @@
+name: Halpme Frontend CD
+
+on:
+  workflow_run:
+    workflows: [ "Halpme Frontend CI" ]
+    types:
+      - completed
+    branches: [ "main" ]
+
+permissions:
+    contents: read
+
+jobs:
+    # 빌드 파일 Github Artifact에서 다운로드 후 EC2에 배포
+    deploy-to-ec2:
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        runs-on: self-hosted
+        steps:
+            # 1. Github Artifact에서 빌드 파일 다운로드
+            - name: Download artifact
+              uses: actions/download-artifact@v4
+              with:
+                name: frontend-build
+                path: build
+                repository: 9oormthonUNIV-Halpme/Frontend
+                run-id: ${{ github.event.workflow_run.id }}
+                github-token: ${{ secrets.TOKEN_GITHUB }}
+            
+            # 2. 임시 배포 디렉토리 생성 및 권한 설정
+            - name: Prepare Nginx directory and permissions
+              run: |
+                sudo mkdir -p -m 2775 /var/www/halpme-frontend-temp
+                sudo chown -R ubuntu:www-data /var/www/halpme-frontend-temp
+                sudo rm -rf /var/www/halpme-frontend-temp/* /var/www/halpme-frontend-temp/.[!.]*
+
+            # 3. 빌드 파일 임시 배포 디렉토리에 복사
+            - name: Copy build files to temp directory
+              run: |
+                sudo cp -r build/* /var/www/halpme-frontend-temp/
+                sudo cp -r build/.[!.]* /var/www/halpme-frontend-temp/ 2>/dev/null || true
+                sudo chown -R ubuntu:www-data /var/www/halpme-frontend-temp
+
+            # 4. 임시 배포 디렉토리에서 Nginx로 서비스
+            - name: Depoly to Nginx
+              run: |
+                sudo rm -rf /var/www/halpme-frontend/* /var/www/halpme-frontend/.[!.]*
+                sudo mv /var/www/halpme-frontend-temp/* /var/www/halpme-frontend/
+                sudo mv /var/www/halpme-frontend-temp/.[!.]* /var/www/halpme-frontend/ 2>/dev/null || true
+            
+            # 5. Nginx Reload
+            - name: Reload Nginx
+              run: sudo systemctl reload nginx
