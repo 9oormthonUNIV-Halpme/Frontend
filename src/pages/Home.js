@@ -12,45 +12,13 @@ const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [score, setScore] = useState(0);
   const [remainingCategory, setRemainingCategory] = useState(1);
-  const rankStages = [
-  { name: '새싹도우미', min: 0, max: 10 },
-  { name: '활동가', min: 10, max: 30 },
-  { name: '마을지킴이', min: 30, max: 60 },
-  { name: '지역리더', min: 60, max: 100 },
-  { name: '영웅', min: 100, max: Infinity }
-];
-const rankIcons = {
-  '새싹도우미': require('../assets/Lankplant.png'),
-  '활동가': require('../assets/Lankhand.png'),
-  '마을지킴이': require('../assets/Lankprotect.png'),
-  '지역리더': require('../assets/Lankfind.png'),
-  '영웅': require('../assets/Lankstar.png'),
-};
-
-const getCurrentRank = (score) => {
-  for (let i = rankStages.length - 1; i >= 0; i--) {
-    if (score >= rankStages[i].min) return rankStages[i];
-  }
-  return rankStages[0];
-};
-
-const getNextRank = (score) => {
-   return rankStages.find((stage) => score < stage.min);
-};
-const currentRank = getCurrentRank(score);
-const nextRank = getNextRank(score);
-const range = nextRank ? nextRank.max - currentRank.min : 1;
-const progressRatio = nextRank ? (score - currentRank.min) / range : 1;
-
-
-
 
   useEffect(() => {
     axios.get('https://halpme.site/api/v1/rank/my-points', {
       headers: { Authorization: `Bearer ${token}` }
     })
     .then(res => {
-      setScore(res.data.data);
+      setScore(res.data.score);
       setRemainingCategory(res.data.remainingCategory);
     })
     .catch(err => {
@@ -73,23 +41,16 @@ const progressRatio = nextRank ? (score - currentRank.min) / range : 1;
           </ActionButton>
         </ButtonWrapper>
       
-    <RankInfoBox>
+        <Divider />
     <RankHeaderRow>
-      <RankIcon src={rankIcons[currentRank.name]} alt={currentRank.name} />
-      <SectionTitle>{currentRank.name}</SectionTitle>
+      <RankIcon src={require('../assets/Lankplant.png')} alt="새싹도우미" />
+      <SectionTitle>새싹 도우미</SectionTitle>
     </RankHeaderRow>
 
-    <ScoreText>
-      {user?.nickname || '사용자'}님의 현재 점수는 <Highlight>{score}점</Highlight> 입니다.
-    </ScoreText>
-
-    <Badge>
-      {nextRank ? `${nextRank.name}까지 ${nextRank.min - score}점 남았어요!` : `최고 등급 달성!`}
-    </Badge>
-  </RankInfoBox>
-
+        <ScoreText>{user?.nickname || '사용자'}님의 현재 점수는 <strong>{score}점</strong>입니다.</ScoreText>
+        <Badge>활동카테고리 {remainingCategory}번 남았어요!</Badge>
         <ProgressBarWrapper>
-          <ProgressBarInner style={{ width: `${progressRatio * 100}%` }} />
+          <ProgressBarInner style={{ width: `${(10 - remainingCategory) * 10}%` }} />
         </ProgressBarWrapper>
         <DoubleButtonWrapper>
           <PrimaryButton onClick={() => navigate('/honor')}>명예의 전당</PrimaryButton>
@@ -198,7 +159,6 @@ const ModalOverlay = styled.div`
   z-index: 999;
 `;
 
-
 const Icon = styled.img`
   width: 24px;
   height: 24px;
@@ -283,12 +243,20 @@ const SecondaryButton = styled.button`
   cursor: pointer;
 `;
 
+const Divider = styled.hr`
+  border: none;
+  height: 1px;
+  background: #eee;
+  margin: 20px 0;
+`;
+
 const SectionTitle = styled.h3`
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
   color: #000;
+  margin-bottom: 8px;
   text-align: left;
-  
+  line-height: 1;
 `;
 
 const ScoreText = styled.p`
@@ -296,11 +264,6 @@ const ScoreText = styled.p`
   color: #000;
   margin-bottom: 8px;
   text-align: left;
-`;
-const Highlight = styled.span`
-  font-size: 20px;
-  color: #3EC6B4;
-  font-weight: bold;
 `;
 
 const Badge = styled.div`
@@ -314,19 +277,17 @@ const Badge = styled.div`
 
 const ProgressBarWrapper = styled.div`
   width: 100%;
-  height: 28px;
+  height: 10px;
   background-color: #eee;
-  border-radius: 20px;
+  border-radius: 10px;
   overflow: hidden;
   margin-bottom: 24px;
 `;
 
 const ProgressBarInner = styled.div`
   height: 100%;
-  background: linear-gradient(to right, #3EC6B4, #A4E7DC);
-  transition: width 0.4s ease;
+  background-color: #3EC6B4; /* Brand_2 */
 `;
-
 
 const DoubleButtonWrapper = styled.div`
   display: flex;
@@ -349,17 +310,18 @@ const RankModal = styled.div`
 const RankRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 9px;
-
 `;
 
 const RankIcon = styled.img`
   width: 24px;
   height: 24px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  vertical-align: middle;
 `;
 const RankText = styled.div`
   display: flex;
-  flex-directionSectionTitle : row;
+  flex-direction: row;
   align-items: baseline;
   gap: 20px;  // ✅ 랭크명과 설명 사이 간격
 `;
@@ -380,18 +342,11 @@ const RankHighlight = styled.strong`
   font-weight: bold;
 `;
 
-const RankInfoBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 70px;  // 기존 Divider 대신 적당한 여백
-`;
-
 const RankHeaderRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin-bottom: 10px;
+  gap: 9px; // 아이콘과 텍스트 사이 간격
+  margin-bottom: 20px;
 `;
 
 const DotIcon = styled.img`

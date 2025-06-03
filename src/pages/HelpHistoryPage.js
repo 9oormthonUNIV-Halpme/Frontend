@@ -5,38 +5,28 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import MobileLayout from '../components/MobileLayout';
 import BottomNavigationBar from '../components/BottomNavigationBar';
+import BackIcon from '../assets/BackIcon.png';
 import HistoryItem from '../components/HistoryItem';
-import Modal from '../components/Modal';
 
 const HelpHistoryPage = () => {
   const [data, setData] = useState([]);
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-const [modalMessage, setModalMessage] = useState('');
-
 
   useEffect(() => {
     axios.get('https://halpme.site/api/v1/posts/my-request', {
       headers: { Authorization: `Bearer ${token}` }
     })
     .then((res) => {
-      console.log('📦 전체 응답:', res.data.data);
-
-      const list = res.data.data.map(item => {
-        // postStatus가 null이면 WAITING 처리
-        const status = item.postStatus ?? 'WAITING';
-        return {
-          postId: item.postId,
-          title: item.title,
-          date: item.requestDate,
-          startTime: item.startHour,
-          endTime: item.endHour,
-          nickname: item.nickname,
-          postStatus: status,
-        };
-      });
-
+      const list = res.data.data.map(item => ({
+        postId: item.postId,
+        title: item.title,
+        date: item.requestDate,
+        startTime: item.startHour,
+        endTime: item.endHour,
+        nickname: item.nickname,
+        postStatus: item.postStatus
+      }));
       setData(list);
     })
     .catch(err => {
@@ -44,7 +34,6 @@ const [modalMessage, setModalMessage] = useState('');
     });
   }, [token]);
 
-  
   const handleStatusChange = async (postId, currentStatus) => {
     console.log('현재 상태:', currentStatus, '포스트 ID:', postId);
     if (currentStatus === 'AUTHENTICATED') {
@@ -70,47 +59,49 @@ const [modalMessage, setModalMessage] = useState('');
         console.error('인증 실패:', err);
       }
     }
+
   };
 
   return (
     <MobileLayout>
       <Wrapper>
         <Header>
-          <BackIcon onClick={() => navigate(-1)}>
-            <svg width="9" height="15" viewBox="0 0 9 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7.89258 13.3027L1.89258 7.30273L7.89258 1.30273" stroke="#1E1E1E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </BackIcon>
+          <BackButton onClick={() => navigate('/my-page')}>
+            <img src={BackIcon} alt="뒤로가기" />
+          </BackButton>
           <TitleText>도움요청 내역</TitleText>
         </Header>
         <List>
           {data.map(post => (
-            <HistoryItem
-              key={post.postId}
-              title={post.title}
-              date={post.date}
-              startTime={post.startTime}
-              endTime={post.endTime}
-              postStatus={post.postStatus}
-              postId={post.postId}
-              viewerType="requester"
-              onStatusChange={handleStatusChange}
-            />
-          ))}
+          <HistoryItem
+            key={post.postId}
+            postId={post.postId}
+            title={post.title}
+            date={post.date}
+            startTime={post.startTime}
+            endTime={post.endTime}
+            postStatus={post.postStatus}
+            onStatusChange={handleStatusChange}
+          />
+        ))}
+
         </List>
       </Wrapper>
-      <Modal
-        isOpen={isModalOpen}
-        message={modalMessage}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={() => setIsModalOpen(false)}
-      />
       <BottomNavigationBar />
     </MobileLayout>
   );
 };
 
 export default HelpHistoryPage;
+
+const getNextStatus = (current) => {
+  switch (current) {
+    case 'REQUESTED': return 'IN_PROGRESS';
+    case 'IN_PROGRESS': return 'AUTHENTICATED';
+    case 'AUTHENTICATED': return 'AUTHENTICATED';
+    default: return 'REQUESTED';
+  }
+};
 
 // ===== styled-components =====
 const Wrapper = styled.div`
@@ -129,6 +120,18 @@ const Header = styled.div`
   margin-bottom: 16px;
 `;
 
+const BackButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  img {
+    width: 6px;
+    height: 12px;
+  }
+`;
+
 const TitleText = styled.h2`
   font-size: 22px;
   font-weight: bold;
@@ -140,13 +143,3 @@ const List = styled.div`
   flex-direction: column;
   gap: 12px;
 `;
-
-const BackIcon = styled.div`
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-`;
-
