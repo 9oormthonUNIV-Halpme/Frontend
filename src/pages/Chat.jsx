@@ -48,6 +48,7 @@ const Chat = () => {
     setLoading(true);
 
     try {
+      console.log("dddddddddddddddddddddd")
       const postIdRes = await axios.get(
         `https://halpme.site/api/v1/chatRoom/${chatroomId}/post`,
         {

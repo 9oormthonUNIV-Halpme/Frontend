@@ -34,6 +34,7 @@ const HelpHistoryPage = () => {
     });
   }, [token]);
 
+
   const handleStatusChange = async (postId, currentStatus) => {
     console.log('현재 상태:', currentStatus, '포스트 ID:', postId);
     if (currentStatus === 'AUTHENTICATED') {
@@ -92,7 +93,6 @@ const HelpHistoryPage = () => {
 };
 
 export default HelpHistoryPage;
-
 
 const Wrapper = styled.div`
   width: 100%;
