@@ -144,7 +144,7 @@ const Chat = () => {
 
       if(result && result.length > 0){
         //const imageUrls = imageUrls.map((url) => url.split("/").pop());
-        console.log("파일명만 추출: ", result);
+        console.log("경로명 추출: ", result);
         sendMessage({
           roomId: chatroomId,
           message: "",
@@ -158,7 +158,7 @@ const Chat = () => {
       
     } 
     catch (e) {
-      alert("파일 업로드 실패!");
+      alert("파일 업로드 실패!", e);
     }
     finally {
       closeCameraMenu();
@@ -312,14 +312,21 @@ const Chat = () => {
     const unsub = subscribe(
       chatroomId,
       (incoming) => {
+        console.log("수신 메시지 구조: ", incoming);
+        console.log("imageUrls 수신 상태 확인", incoming.imageUrls);
         setChatMessages((prev) => [...prev, incoming]);
         // 메시지가 렌더링되면 읽음 처리
         markAsRead(incoming.id);
       },
       // 읽음 상태 업데이트 필요 시
       (readInfo) => {
+        // 상대방이 읽은 메시지 ID 목록이 올 경우
         setChatMessages((prev) =>
-          prev.map((c) => (c.id === readInfo.lastReadId ? { ...c, read: true } : c))
+          prev.map((msg) => 
+            readInfo.readMessageIds.includes(msg.id)
+              ? { ...msg, readStatus: true }
+              : msg
+          )
         );
       }
     );
