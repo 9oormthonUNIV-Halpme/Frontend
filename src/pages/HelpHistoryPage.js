@@ -64,7 +64,6 @@ const [modalMessage, setModalMessage] = useState('');
           )
         );
 
-         // ✅ 모달 띄우기
       setModalMessage('봉사가 인증되었습니다 ✅');
       setIsModalOpen(true);
       } catch (err) {
