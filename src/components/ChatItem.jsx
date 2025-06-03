@@ -86,10 +86,17 @@ const Time = styled.div`
 `;
 
 const LastMessage = styled.div`
+  max-width: 200px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
   font-size: 14px;
   color: #666;
   display: flex; 
   align-items: flex-start;
+  text-align: left;
   color: #888888;
 `;
 

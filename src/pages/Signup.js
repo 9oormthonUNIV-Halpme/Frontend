@@ -1,4 +1,4 @@
-import axios from 'axios'; // 파일 상단에 추가
+import axios from 'axios'; 
 import React, { useEffect, useContext, useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
